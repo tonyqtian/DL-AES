@@ -54,7 +54,8 @@ class MeanOverTime(Layer):
 
 	def call(self, x, mask=None):
 		if self.mask_zero:
-			return K.cast(x.sum(axis=1) / mask.sum(axis=1, keepdims=True), K.floatx())
+			return K.sum(x, axis=1) / K.sum(K.cast(mask, K.floatx()), axis=1, keepdims=True)
+# 			return K.cast(K.sum(x, axis=1) / K.sum(mask, axis=1, keepdims=True), K.floatx())
 		else:
 			return K.mean(x, axis=1)
 

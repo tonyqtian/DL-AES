@@ -1,6 +1,6 @@
 import codecs
 import logging
-import numpy as np
+# import numpy as np
 
 logger = logging.getLogger(__name__)
 
@@ -10,6 +10,8 @@ class W2VEmbReader:
 		has_header=False
 		with codecs.open(emb_path, 'r', encoding='utf8') as emb_file:
 			tokens = emb_file.next().split()
+# 			next(emb_file)
+# 			tokens = emb_file.split()
 			if len(tokens) == 2:
 				try:
 					int(tokens[0])
