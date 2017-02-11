@@ -3,7 +3,8 @@ import keras.optimizers as opt
 def get_optimizer(args):
 
 	clipvalue = 0
-	clipnorm = 10
+# 	clipnorm = 10
+	clipnorm = 0
 
 	if args.algorithm == 'rmsprop':
 		optimizer = opt.RMSprop(lr=0.001, rho=0.9, epsilon=1e-06, clipnorm=clipnorm, clipvalue=clipvalue)
