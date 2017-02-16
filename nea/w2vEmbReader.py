@@ -63,14 +63,16 @@ class W2VEmbReader:
 	
 	def get_emb_matrix_given_vocab(self, vocab, emb_matrix):
 		counter = 0.
+		missed_words = []
 		for word, index in vocab.items():
 			try:
 				emb_matrix[index] = self.embeddings[word]
 # 				emb_matrix[index].assign(self.embeddings[word])
 				counter += 1
 			except KeyError:
-				pass
+				missed_words.append(word)
 		logger.info('%i/%i word vectors initialized (hit rate: %.2f%%)' % (counter, len(vocab), 100*counter/len(vocab)))
+		logger.info('Unintialized word list: %s' % (missed_words,))
 		return emb_matrix
 	
 	def get_emb_dim(self):

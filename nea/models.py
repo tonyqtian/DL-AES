@@ -9,7 +9,7 @@ def create_model(args, initial_mean_value, overal_maxlen, vocab):
 	from keras.layers.embeddings import Embedding
 	from keras.models import Sequential, Model
 	from keras.layers.core import Dense, Dropout, Activation
-	from nea.my_layers import Attention, MeanOverTime, Conv1DWithMasking
+	from my_layers import Attention, MeanOverTime, Conv1DWithMasking
 	
 	###############################################################################################################################
 	## Recurrence unit type
@@ -32,6 +32,28 @@ def create_model(args, initial_mean_value, overal_maxlen, vocab):
 	if initial_mean_value.ndim == 0:
 		initial_mean_value = np.expand_dims(initial_mean_value, axis=1)
 	num_outputs = len(initial_mean_value)
+
+	###############################################################################################################################
+	## Initialize embeddings if requested
+	#
+	my_trainable = True
+	if args.emb_path:
+		def my_init(shape, name=None):
+			from w2vEmbReader import W2VEmbReader as EmbReader
+			logger.info('Initializing lookup table')
+			emb_reader = EmbReader(args.emb_path, emb_dim=args.emb_dim)
+			emb_matrix = np.random.random(shape)
+			logger.info(' initial matrix \n %s ' % (emb_matrix,))
+			emb_matrix = emb_reader.get_emb_matrix_given_vocab(vocab, emb_matrix)
+# 			from keras.backend import set_value, get_value
+# 			set_value(model.layers[model.emb_index].W, get_value(emb_reader.get_emb_matrix_given_vocab(vocab, model.layers[model.emb_index].W)))
+# 			model.layers[model.emb_index].W.set_value(emb_reader.get_emb_matrix_given_vocab(vocab, model.layers[model.emb_index].W.get_value()))
+			logger.info(' pre-trained matrix \n %s ' % (emb_matrix,))
+			return K.variable(emb_matrix, name=name)
+		logger.info(' Use pre-trained embedding')
+	else:
+		my_init = 'uniform'
+		logger.info(' Use default initializing embedding')
 	
 	if args.model_type == 'cls':
 		raise NotImplementedError
@@ -39,7 +61,7 @@ def create_model(args, initial_mean_value, overal_maxlen, vocab):
 	elif args.model_type == 'reg':
 		logger.info('Building a REGRESSION model')
 		model = Sequential()
-		model.add(Embedding(args.vocab_size, args.emb_dim, mask_zero=True))
+		model.add(Embedding(args.vocab_size, args.emb_dim, mask_zero=True, init=my_init, trainable=my_trainable))
 		if args.cnn_dim > 0:
 			model.add(Conv1DWithMasking(nb_filter=args.cnn_dim, filter_length=args.cnn_window_size, border_mode=cnn_border_mode, subsample_length=1))
 		if args.rnn_dim > 0:
@@ -56,7 +78,7 @@ def create_model(args, initial_mean_value, overal_maxlen, vocab):
 	elif args.model_type == 'regp':
 		logger.info('Building a REGRESSION model with POOLING')
 		model = Sequential()
-		model.add(Embedding(args.vocab_size, args.emb_dim, mask_zero=True))
+		model.add(Embedding(args.vocab_size, args.emb_dim, mask_zero=True, init=my_init, trainable=my_trainable))
 		if args.cnn_dim > 0:
 			model.add(Conv1DWithMasking(nb_filter=args.cnn_dim, filter_length=args.cnn_window_size, border_mode=cnn_border_mode, subsample_length=1))
 		if args.rnn_dim > 0:
@@ -80,7 +102,7 @@ def create_model(args, initial_mean_value, overal_maxlen, vocab):
 		from keras.engine.topology import Input, merge
 		model = Sequential()
 		sequence = Input(shape=(overal_maxlen,), dtype='int32')
-		output = Embedding(args.vocab_size, args.emb_dim, mask_zero=True)(sequence)
+		output = Embedding(args.vocab_size, args.emb_dim, mask_zero=True, init=my_init, trainable=my_trainable)(sequence)
 		if args.cnn_dim > 0:
 			output = Conv1DWithMasking(nb_filter=args.cnn_dim, filter_length=args.cnn_window_size, border_mode=cnn_border_mode, subsample_length=1)(output)
 		if args.rnn_dim > 0:
@@ -102,7 +124,7 @@ def create_model(args, initial_mean_value, overal_maxlen, vocab):
 		from keras.engine.topology import Input, merge
 		model = Sequential()
 		sequence = Input(shape=(overal_maxlen,), dtype='int32')
-		output = Embedding(args.vocab_size, args.emb_dim, mask_zero=True)(sequence)
+		output = Embedding(args.vocab_size, args.emb_dim, mask_zero=True, init=my_init, trainable=my_trainable)(sequence)
 		if args.cnn_dim > 0:
 			output = Conv1DWithMasking(nb_filter=args.cnn_dim, filter_length=args.cnn_window_size, border_mode=cnn_border_mode, subsample_length=1)(output)
 		if args.rnn_dim > 0:
@@ -122,18 +144,5 @@ def create_model(args, initial_mean_value, overal_maxlen, vocab):
 		model.emb_index = 1
 	
 	logger.info('  Done')
-	
-	###############################################################################################################################
-	## Initialize embeddings if requested
-	#
-
-	if args.emb_path:
-		from w2vEmbReader import W2VEmbReader as EmbReader
-		logger.info('Initializing lookup table')
-		emb_reader = EmbReader(args.emb_path, emb_dim=args.emb_dim)
-		from keras.backend import set_value, get_value
-		set_value(model.layers[model.emb_index].W, get_value(emb_reader.get_emb_matrix_given_vocab(vocab, model.layers[model.emb_index].W)))
-# 		model.layers[model.emb_index].W.set_value(emb_reader.get_emb_matrix_given_vocab(vocab, model.layers[model.emb_index].W.get_value()))
-		logger.info('  Done')
-	
+		
 	return model

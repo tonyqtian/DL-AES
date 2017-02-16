@@ -1,6 +1,6 @@
-import random
+# import random
 import codecs
-import sys
+# import sys
 import nltk
 import logging
 import re
