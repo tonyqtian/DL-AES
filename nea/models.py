@@ -77,7 +77,7 @@ def create_model(args, initial_mean_value, overal_maxlen, vocab):
 	
 	elif args.model_type == 'breg':
 		logger.info('Building a BIDIRECTIONAL REGRESSION model')
-		from keras.layers import Dense, Dropout, Embedding, LSTM, Input, merge
+		from keras.engine.topology import Input, merge
 		model = Sequential()
 		sequence = Input(shape=(overal_maxlen,), dtype='int32')
 		output = Embedding(args.vocab_size, args.emb_dim, mask_zero=True)(sequence)
@@ -99,7 +99,7 @@ def create_model(args, initial_mean_value, overal_maxlen, vocab):
 	
 	elif args.model_type == 'bregp':
 		logger.info('Building a BIDIRECTIONAL REGRESSION model with POOLING')
-		from keras.layers import Dense, Dropout, Embedding, LSTM, Input, merge
+		from keras.engine.topology import Input, merge
 		model = Sequential()
 		sequence = Input(shape=(overal_maxlen,), dtype='int32')
 		output = Embedding(args.vocab_size, args.emb_dim, mask_zero=True)(sequence)
@@ -131,7 +131,9 @@ def create_model(args, initial_mean_value, overal_maxlen, vocab):
 		from w2vEmbReader import W2VEmbReader as EmbReader
 		logger.info('Initializing lookup table')
 		emb_reader = EmbReader(args.emb_path, emb_dim=args.emb_dim)
-		model.layers[model.emb_index].W.set_value(emb_reader.get_emb_matrix_given_vocab(vocab, model.layers[model.emb_index].W.get_value()))
+		from keras.backend import set_value, get_value
+		set_value(model.layers[model.emb_index].W, get_value(emb_reader.get_emb_matrix_given_vocab(vocab, model.layers[model.emb_index].W)))
+# 		model.layers[model.emb_index].W.set_value(emb_reader.get_emb_matrix_given_vocab(vocab, model.layers[model.emb_index].W.get_value()))
 		logger.info('  Done')
 	
 	return model

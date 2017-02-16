@@ -1,6 +1,7 @@
 import sys
 import os, errno
 import logging
+import time
 
 #-----------------------------------------------------------------------------------------------------------#
 
@@ -14,8 +15,9 @@ def set_logger(out_dir=None):
 	console.setFormatter(logging.Formatter(console_format))
 	logger.addHandler(console)
 	if out_dir:
+		timestr = time.strftime("-%Y%m%d-%H%M%S")
 		file_format = '[%(levelname)s] (%(name)s) %(message)s'
-		log_file = logging.FileHandler(out_dir + '/log.txt', mode='w')
+		log_file = logging.FileHandler(out_dir + '/log' + timestr + '.txt', mode='w')
 		log_file.setLevel(logging.DEBUG)
 		log_file.setFormatter(logging.Formatter(file_format))
 		logger.addHandler(log_file)
