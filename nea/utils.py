@@ -17,7 +17,7 @@ def set_logger(out_dir=None):
 	if out_dir:
 		timestr = time.strftime("-%Y%m%d-%H%M%S")
 		file_format = '[%(levelname)s] (%(name)s) %(message)s'
-		log_file = logging.FileHandler(out_dir + '/log' + timestr + '.txt', mode='w')
+		log_file = logging.FileHandler(out_dir + '/log' + timestr + '.txt', mode='w', encoding='UTF8')
 		log_file.setLevel(logging.DEBUG)
 		log_file.setFormatter(logging.Formatter(file_format))
 		logger.addHandler(log_file)

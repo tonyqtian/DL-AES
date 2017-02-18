@@ -10,8 +10,6 @@ class W2VEmbReader:
 		has_header=False
 		with codecs.open(emb_path, 'r', encoding='utf8') as emb_file:
 			tokens = next(emb_file).split()
-# 			next(emb_file)
-# 			tokens = emb_file.split()
 			if len(tokens) == 2:
 				try:
 					int(tokens[0])
@@ -21,7 +19,7 @@ class W2VEmbReader:
 					pass
 		if has_header:
 			with codecs.open(emb_path, 'r', encoding='utf8') as emb_file:
-				tokens = next(emb_file).split()
+				tokens = next(emb_file).strip().split()
 				assert len(tokens) == 2, 'The first line in W2V embeddings must be the pair (vocab_size, emb_dim)'
 				self.vocab_size = int(tokens[0])
 				self.emb_dim = int(tokens[1])
@@ -42,7 +40,12 @@ class W2VEmbReader:
 				self.emb_dim = -1
 				self.embeddings = {}
 				for line in emb_file:
-					tokens = line.split()
+					tokens = line.strip().split()
+					if len(tokens) == 2:
+						# for comma saperated table
+						token = line.strip().split()
+						tokens = [token[0],]
+						tokens.extend(token[1].split(','))
 					if self.emb_dim == -1:
 						self.emb_dim = len(tokens) - 1
 						assert self.emb_dim == emb_dim, 'The embeddings dimension does not match with the requested dimension'
@@ -72,7 +75,8 @@ class W2VEmbReader:
 			except KeyError:
 				missed_words.append(word)
 		logger.info('%i/%i word vectors initialized (hit rate: %.2f%%)' % (counter, len(vocab), 100*counter/len(vocab)))
-		logger.info('Unintialized word list: %s' % (missed_words,))
+		logger.info('Unintialized word list: %s' % (' | '.join([word for word in missed_words]),))
+		del self.embeddings
 		return emb_matrix
 	
 	def get_emb_dim(self):

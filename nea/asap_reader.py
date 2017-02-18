@@ -37,6 +37,70 @@ def tokenize(string):
 def get_score_range(prompt_id):
 	return asap_ranges[prompt_id]
 
+
+def sentence_cleaner(text):
+	# prepare for word based processing
+# 	re4 = re.compile(r'\.\.+')
+# 	re5 = re.compile(r' +')
+
+# 	text = text.lower()
+# 	text = re4.sub(' <3dot> ', text)
+
+	text = text.replace('â€™', '’')
+	
+	text = text.replace('can’t', 'cannot')
+	text = text.replace('it’s', 'it is')
+	text = text.replace('n’t', ' not')
+	text = text.replace('’ll', ' will')
+	text = text.replace('’s', ' ’s')
+	text = text.replace('’ve', ' have')
+	text = text.replace('’d', ' would')
+	text = text.replace('’m', ' am')
+
+	text = text.replace('can`t', 'cannot')
+	text = text.replace('it`s', 'it is')
+	text = text.replace('n`t', ' not')
+	text = text.replace('`ll', ' will')
+	text = text.replace('`s', ' ’s')
+	text = text.replace('`ve', ' have')
+	text = text.replace('`d', ' would')
+	text = text.replace('`m', ' am')
+
+	text = text.replace("can't", "cannot")
+	text = text.replace("it's", "it is")
+	text = text.replace("n't", " not")
+	text = text.replace("'ll", " will")
+	text = text.replace("'s", " ’s")
+	text = text.replace("'ve", " have")
+	text = text.replace("'d", " would")
+	text = text.replace("'m", " am")
+		
+	text = text.replace('…', ' … ')
+	text = text.replace('”', ' ” ')
+	text = text.replace('“', ' “ ')
+	text = text.replace('/', ' / ')
+	text = text.replace('‘', ' ‘ ')
+	text = text.replace('’', ' ’ ')
+	text = text.replace('–', ' - ')
+	
+	text = text.replace(',', ' , ')
+	text = text.replace('.', ' . ')
+	text = text.replace('(', ' ( ')
+	text = text.replace(')', ' ) ')
+	text = text.replace('[', ' ( ')
+	text = text.replace(']', ' ) ')
+	text = text.replace(':', ' : ')
+	text = text.replace("'", " ' ")
+	text = text.replace('?', ' ? ')
+	text = text.replace(';', ' ; ')
+	
+# 	text = text.replace('<3dot>', ' ... ')
+	text = text.replace('"', '')
+
+# 	text = re5.sub(' ', text)
+# 	text = text.replace('\n', ' <nl> ')
+	return text
+
 def get_model_friendly_scores(scores_array, prompt_id_array):
 	arg_type = type(prompt_id_array)
 	assert arg_type in {int, np.ndarray}
@@ -95,6 +159,7 @@ def create_vocab(file_path, prompt_id, maxlen, vocab_size, tokenize_text, to_low
 			content = tokens[2].strip()
 			score = float(tokens[6])
 			if essay_set == prompt_id or prompt_id <= 0:
+				content = sentence_cleaner(content)
 				if to_lower:
 					content = content.lower()
 				if tokenize_text:
@@ -127,18 +192,18 @@ def create_vocab(file_path, prompt_id, maxlen, vocab_size, tokenize_text, to_low
 		index += 1
 	return vocab
 
-def read_essays(file_path, prompt_id):
-	logger.info('Reading tsv from: ' + file_path)
-	essays_list = []
-	essays_ids = []
-	with codecs.open(file_path, mode='r', encoding='UTF8') as input_file:
-		next(input_file)
-		for line in input_file:
-			tokens = line.strip().split('\t')
-			if int(tokens[1]) == prompt_id or prompt_id <= 0:
-				essays_list.append(tokens[2].strip())
-				essays_ids.append(int(tokens[0]))
-	return essays_list, essays_ids
+# def read_essays(file_path, prompt_id):
+# 	logger.info('Reading tsv from: ' + file_path)
+# 	essays_list = []
+# 	essays_ids = []
+# 	with codecs.open(file_path, mode='r', encoding='UTF8') as input_file:
+# 		next(input_file)
+# 		for line in input_file:
+# 			tokens = line.strip().split('\t')
+# 			if int(tokens[1]) == prompt_id or prompt_id <= 0:
+# 				essays_list.append(tokens[2].strip())
+# 				essays_ids.append(int(tokens[0]))
+# 	return essays_list, essays_ids
 
 def read_dataset(file_path, prompt_id, maxlen, vocab, tokenize_text, to_lower, score_index=6, char_level=False):
 	logger.info('Reading dataset from: ' + file_path)
@@ -156,6 +221,7 @@ def read_dataset(file_path, prompt_id, maxlen, vocab, tokenize_text, to_lower, s
 			content = tokens[2].strip()
 			score = float(tokens[score_index])
 			if essay_set == prompt_id or prompt_id <= 0:
+				content = sentence_cleaner(content)
 				if to_lower:
 					content = content.lower()
 				if char_level:
