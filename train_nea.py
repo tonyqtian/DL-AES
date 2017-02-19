@@ -101,6 +101,7 @@ if args.prompt_id:
 	dev_pmt = np.array(dev_pmt, dtype='int32')
 	test_pmt = np.array(test_pmt, dtype='int32')
 
+# count score distribution
 bincounts, mfs_list = U.bincounts(train_y)
 with open('%s/bincounts.txt' % out_dir, 'w') as output_file:
 	for bincount in bincounts:
@@ -108,6 +109,8 @@ with open('%s/bincounts.txt' % out_dir, 'w') as output_file:
 
 train_mean = train_y.mean(axis=0)
 train_std = train_y.std(axis=0)
+train_max = train_y.max(axis=0)
+train_min = train_y.min(axis=0)
 dev_mean = dev_y.mean(axis=0)
 dev_std = dev_y.std(axis=0)
 test_mean = test_y.mean(axis=0)
@@ -123,7 +126,8 @@ logger.info('  train_y shape: ' + str(train_y.shape))
 logger.info('  dev_y shape:   ' + str(dev_y.shape))
 logger.info('  test_y shape:  ' + str(test_y.shape))
 
-logger.info('  train_y mean: %s, stdev: %s, MFC: %s' % (str(train_mean), str(train_std), str(mfs_list)))
+logger.info('  train_y max: %d, min: %d, mean: %.2f, stdev: %.3f, MFC: %s' % (train_max, train_min, train_mean, train_std, str(mfs_list)))
+logger.info('  train_y statistic: %s' % (str(bincounts[0]),))
 
 # We need the dev and test sets in the original scale for evaluation
 dev_y_org = dev_y.astype(dataset.get_ref_dtype())

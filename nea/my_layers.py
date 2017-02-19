@@ -2,7 +2,7 @@ import keras.backend as K
 from keras.engine.topology import Layer
 from keras.layers.convolutional import Convolution1D
 import numpy as np
-import sys
+# import sys
 
 class Attention(Layer):
 	def __init__(self, op='attsum', activation='tanh', init_stdev=0.01, **kwargs):
