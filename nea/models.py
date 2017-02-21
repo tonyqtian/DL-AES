@@ -27,15 +27,15 @@ def create_model(args, initial_mean_value, overal_maxlen, vocab):
 	## Create Model
 	#
 	
-	dropout_W = 0.5		# default=0.5
-	dropout_U = 0.5		# default=0.1
+	dropout_W = 0.4		# default=0.5
+	dropout_U = 0.4		# default=0.1
 	cnn_border_mode='same'
 	if "reg" in args.model_type:
 		if initial_mean_value.ndim == 0:
 			initial_mean_value = np.expand_dims(initial_mean_value, axis=1)
 		num_outputs = len(initial_mean_value)
 	else:
-		num_outputs = int(max(initial_mean_value.keys())) + 1
+		num_outputs = initial_mean_value
 
 
 	###############################################################################################################################
@@ -71,13 +71,15 @@ def create_model(args, initial_mean_value, overal_maxlen, vocab):
 			model.add(Conv1DWithMasking(nb_filter=args.cnn_dim, filter_length=args.cnn_window_size, border_mode=cnn_border_mode, subsample_length=1))
 		if args.rnn_dim > 0:
 			model.add(RNN(args.rnn_dim, return_sequences=True, dropout_W=dropout_W, dropout_U=dropout_U))
-		if args.dropout_prob > 0:
-			model.add(Dropout(args.dropout_prob))
+# 		if args.dropout_prob > 0:
+# 			model.add(Dropout(args.dropout_prob))
 		if args.aggregation == 'mot':
 			model.add(MeanOverTime(mask_zero=True))
 		elif args.aggregation.startswith('att'):
 			model.add(Attention(op=args.aggregation, activation='tanh', init_stdev=0.01))
-# 		model.add(Dense(32, activation='tanh', dropout=))
+		model.add(Dense(32, activation='tanh'))
+		if args.dropout_prob > 0:
+			model.add(Dropout(args.dropout_prob))
 		model.add(Dense(num_outputs, activation='softmax'))
 		
 	elif args.model_type == 'reg':
