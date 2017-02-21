@@ -1,5 +1,6 @@
 import numpy as np
 import logging
+from keras.backend.tensorflow_backend import dropout
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +28,7 @@ def create_model(args, initial_mean_value, overal_maxlen, vocab):
 	#
 	
 	dropout_W = 0.5		# default=0.5
-	dropout_U = 0.1		# default=0.1
+	dropout_U = 0.5		# default=0.1
 	cnn_border_mode='same'
 	if "reg" in args.model_type:
 		if initial_mean_value.ndim == 0:
@@ -76,7 +77,7 @@ def create_model(args, initial_mean_value, overal_maxlen, vocab):
 			model.add(MeanOverTime(mask_zero=True))
 		elif args.aggregation.startswith('att'):
 			model.add(Attention(op=args.aggregation, activation='tanh', init_stdev=0.01))
-		model.add(Dense(32, activation='tanh'))
+# 		model.add(Dense(32, activation='tanh', dropout=))
 		model.add(Dense(num_outputs, activation='softmax'))
 		
 	elif args.model_type == 'reg':
