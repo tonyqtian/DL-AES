@@ -29,9 +29,13 @@ def create_model(args, initial_mean_value, overal_maxlen, vocab):
 	dropout_W = 0.5		# default=0.5
 	dropout_U = 0.1		# default=0.1
 	cnn_border_mode='same'
-	if initial_mean_value.ndim == 0:
-		initial_mean_value = np.expand_dims(initial_mean_value, axis=1)
-	num_outputs = len(initial_mean_value)
+	if "reg" in args.model_type:
+		if initial_mean_value.ndim == 0:
+			initial_mean_value = np.expand_dims(initial_mean_value, axis=1)
+		num_outputs = len(initial_mean_value)
+	else:
+		num_outputs = int(max(initial_mean_value.keys()))
+
 
 	###############################################################################################################################
 	## Initialize embeddings if requested
@@ -72,12 +76,8 @@ def create_model(args, initial_mean_value, overal_maxlen, vocab):
 			model.add(MeanOverTime(mask_zero=True))
 		elif args.aggregation.startswith('att'):
 			model.add(Attention(op=args.aggregation, activation='tanh', init_stdev=0.01))
-		model.add(Dense(num_outputs))
-		if not args.skip_init_bias:
-			bias_value = (np.log(initial_mean_value) - np.log(1 - initial_mean_value)).astype(K.floatx())
-# 			model.layers[-1].b.set_value(bias_value)
-			K.set_value(model.layers[-1].b, bias_value)
-		model.add(Activation('sigmoid'))
+		model.add(Dense(32, activation='tanh'))
+		model.add(Dense(num_outputs, activation='softmax'))
 		
 	elif args.model_type == 'reg':
 		logger.info('Building a REGRESSION model')

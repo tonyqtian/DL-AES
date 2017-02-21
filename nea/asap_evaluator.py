@@ -4,14 +4,15 @@ import numpy as np
 from nea.my_kappa_calculator import quadratic_weighted_kappa as qwk
 # from nea.my_kappa_calculator import linear_weighted_kappa as lwk
 from nea.my_kappa_calculator import cohen_kappa as lwk
+import nea.asap_reader as dataset
 
 logger = logging.getLogger(__name__)
 
 class Evaluator():
 	
-	def __init__(self, dataset, prompt_id, out_dir, dev_x, test_x, dev_y, test_y, dev_y_org, test_y_org):
-		self.dataset = dataset
-		self.prompt_id = prompt_id
+	def __init__(self, arg, out_dir, dev_x, test_x, dev_y, test_y, dev_y_org, test_y_org):
+		self.arg = arg
+		self.prompt_id = self.arg.prompt_id
 		self.out_dir = out_dir
 		self.dev_x, self.test_x = dev_x, test_x
 		self.dev_y, self.test_y = dev_y, test_y
@@ -26,7 +27,7 @@ class Evaluator():
 		self.best_test_missed = -1
 		self.best_test_missed_epoch = -1
 		self.batch_size = 180
-		self.low, self.high = self.dataset.get_score_range(self.prompt_id)
+		self.low, self.high = dataset.get_score_range(self.prompt_id)
 		self.dump_ref_scores()
 	
 	def dump_ref_scores(self):
@@ -63,8 +64,12 @@ class Evaluator():
 		self.dev_pred = model.predict(self.dev_x, batch_size=self.batch_size).squeeze()
 		self.test_pred = model.predict(self.test_x, batch_size=self.batch_size).squeeze()
 		
-		self.dev_pred = self.dataset.convert_to_dataset_friendly_scores(self.dev_pred, self.prompt_id)
-		self.test_pred = self.dataset.convert_to_dataset_friendly_scores(self.test_pred, self.prompt_id)
+		if "reg" in self.arg.model_type:
+			self.dev_pred = dataset.convert_to_dataset_friendly_scores(self.dev_pred, self.prompt_id)
+			self.test_pred = dataset.convert_to_dataset_friendly_scores(self.test_pred, self.prompt_id)
+		else:
+			self.dev_pred = dataset.convert_1hot_to_score(self.dev_pred)
+			self.test_pred = dataset.convert_1hot_to_score(self.test_pred)			
 		
 		self.dump_predictions(self.dev_pred, self.test_pred, epoch)
 		

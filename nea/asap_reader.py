@@ -135,6 +135,9 @@ def convert_to_dataset_friendly_scores(scores_array, prompt_id_array):
 		scores_array = scores_array * (high - low) + low
 	return scores_array
 
+def convert_1hot_to_score(scores_array):
+	return np.argmax(scores_array, axis=1)
+
 def is_number(token):
 	return bool(num_regex.match(token))
 

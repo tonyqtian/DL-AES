@@ -1,11 +1,12 @@
 import argparse
 import logging
 import numpy as np
-import scipy
+# import scipy
 from time import time
-import sys
+# import sys
 import nea.utils as U
 import pickle as pk
+from keras.utils.np_utils import to_categorical
 
 logger = logging.getLogger(__name__)
 
@@ -19,10 +20,10 @@ parser.add_argument("-tu", "--tune", dest="dev_path", type=str, metavar='<str>',
 parser.add_argument("-ts", "--test", dest="test_path", type=str, metavar='<str>', required=True, help="The path to the test set")
 parser.add_argument("-o", "--out-dir", dest="out_dir_path", type=str, metavar='<str>', required=True, help="The path to the output directory")
 parser.add_argument("-p", "--prompt", dest="prompt_id", type=int, metavar='<int>', required=False, help="Promp ID for ASAP dataset. '0' means all prompts.")
-parser.add_argument("-t", "--type", dest="model_type", type=str, metavar='<str>', default='regp', help="Model type (reg|regp|breg|bregp) (default=regp)")
+parser.add_argument("-t", "--type", dest="model_type", type=str, metavar='<str>', default='regp', help="Model type (cls|clsp|reg|regp|breg|bregp) (default=regp)")
 parser.add_argument("-u", "--rec-unit", dest="recurrent_unit", type=str, metavar='<str>', default='lstm', help="Recurrent unit type (lstm|gru|simple) (default=lstm)")
 parser.add_argument("-a", "--algorithm", dest="algorithm", type=str, metavar='<str>', default='rmsprop', help="Optimization algorithm (rmsprop|sgd|adagrad|adadelta|adam|adamax) (default=rmsprop)")
-parser.add_argument("-l", "--loss", dest="loss", type=str, metavar='<str>', default='mse', help="Loss function (mse|mae) (default=mse)")
+parser.add_argument("-l", "--loss", dest="loss", type=str, metavar='<str>', default='mse', help="Loss function (mse|mae|cnp) (default=mse)")
 parser.add_argument("-e", "--embdim", dest="emb_dim", type=int, metavar='<int>', default=50, help="Embeddings dimension (default=50)")
 parser.add_argument("-c", "--cnndim", dest="cnn_dim", type=int, metavar='<int>', default=0, help="CNN output dimension. '0' means no CNN layer (default=0)")
 parser.add_argument("-w", "--cnnwin", dest="cnn_window_size", type=int, metavar='<int>', default=3, help="CNN window size. (default=3)")
@@ -45,9 +46,9 @@ U.mkdir_p(out_dir + '/preds')
 U.set_logger(out_dir)
 U.print_args(args)
 
-assert args.model_type in {'reg', 'regp', 'breg', 'bregp'}
+assert args.model_type in {'cls', 'clsp', 'reg', 'regp', 'breg', 'bregp'}
 assert args.algorithm in {'rmsprop', 'sgd', 'adagrad', 'adadelta', 'adam', 'adamax'}
-assert args.loss in {'mse', 'mae'}
+assert args.loss in {'mse', 'mae', 'cnp'}
 assert args.recurrent_unit in {'lstm', 'gru', 'simple'}
 assert args.aggregation in {'mot', 'attsum', 'attmean'}
 
@@ -133,11 +134,20 @@ logger.info('  train_y statistic: %s' % (str(bincounts[0]),))
 dev_y_org = dev_y.astype(dataset.get_ref_dtype())
 test_y_org = test_y.astype(dataset.get_ref_dtype())
 
-# Convert scores to boundary of [0 1] for training and evaluation (loss calculation)
-train_y = dataset.get_model_friendly_scores(train_y, train_pmt)
-dev_y = dataset.get_model_friendly_scores(dev_y, dev_pmt)
-test_y = dataset.get_model_friendly_scores(test_y, test_pmt)
-
+if "reg" in args.model_type:
+	# Convert scores to boundary of [0 1] for training and evaluation (loss calculation)
+	train_y = dataset.get_model_friendly_scores(train_y, train_pmt)
+	dev_y = dataset.get_model_friendly_scores(dev_y, dev_pmt)
+	test_y = dataset.get_model_friendly_scores(test_y, test_pmt)
+else:
+	logger.info('  covert train_y to one hot shape')
+	assert len(bincounts) == 1, "support only one y value"
+	categ = int(max(bincounts[0].keys()))
+	# covert to np array to minus 1 to get zero based value
+	train_y = to_categorical(np.array(train_y) - 1, categ)
+	dev_y = to_categorical(np.array(dev_y) - 1, categ)
+	test_y = to_categorical(np.array(test_y) - 1, categ)
+	
 ###############################################################################################################################
 ## Optimizaer algorithm
 #
@@ -155,12 +165,24 @@ from nea.models import create_model
 if args.loss == 'mse':
 	loss = 'mean_squared_error'
 	metric = 'mean_absolute_error'
-else:
+elif args.loss == 'mae':
 	loss = 'mean_absolute_error'
 	metric = 'mean_squared_error'
-
-model = create_model(args, train_y.mean(axis=0), overal_maxlen, vocab)
+else:
+	loss = 'categorical_crossentropy'
+	metric = 'categorical_accuracy'
+			
+if "reg" in args.model_type:
+	model = create_model(args, train_y.mean(axis=0), overal_maxlen, vocab)
+else:
+	logger.info('  use classification model')
+	loss = 'categorical_crossentropy'
+	metric = 'categorical_accuracy'
+	model = create_model(args, bincounts[0], overal_maxlen, vocab)
+	
 model.compile(loss=loss, optimizer=optimizer, metrics=[metric])
+
+logger.info(model.summary())
 
 ###############################################################################################################################
 ## Plotting model
@@ -183,7 +205,7 @@ logger.info('  Done')
 ## Evaluator
 #
 
-evl = Evaluator(dataset, args.prompt_id, out_dir, dev_x, test_x, dev_y, test_y, dev_y_org, test_y_org)
+evl = Evaluator(args, out_dir, dev_x, test_x, dev_y, test_y, dev_y_org, test_y_org)
 
 ###############################################################################################################################
 ## Training
