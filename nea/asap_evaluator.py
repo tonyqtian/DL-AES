@@ -1,9 +1,9 @@
 from scipy.stats import pearsonr, spearmanr, kendalltau
 import logging
 import numpy as np
-from my_kappa_calculator import quadratic_weighted_kappa as qwk
-# from my_kappa_calculator import linear_weighted_kappa as lwk
-from my_kappa_calculator import cohen_kappa as lwk
+from nea.my_kappa_calculator import quadratic_weighted_kappa as qwk
+# from nea.my_kappa_calculator import linear_weighted_kappa as lwk
+from nea.my_kappa_calculator import cohen_kappa as lwk
 
 logger = logging.getLogger(__name__)
 

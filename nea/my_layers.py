@@ -24,9 +24,11 @@ class Attention(Layer):
 	def call(self, x, mask=None):
 		y = K.dot(x, self.att_W)
 		if not self.activation:
-			weights = K.theano.tensor.tensordot(self.att_v, y, axes=[0, 2])
+# 			weights = K.theano.tensor.tensordot(self.att_v, y, axes=[0, 2])
+			raise NotImplementedError
 		elif self.activation == 'tanh':
-			weights = K.theano.tensor.tensordot(self.att_v, K.tanh(y), axes=[0, 2])
+# 			weights = K.theano.tensor.tensordot(self.att_v, K.tanh(y), axes=[0, 2])
+			raise NotImplementedError
 		weights = K.softmax(weights)
 		out = x * K.permute_dimensions(K.repeat(weights, x.shape[2]), [0, 2, 1])
 		if self.op == 'attsum':
