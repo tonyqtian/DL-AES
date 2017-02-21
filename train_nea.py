@@ -142,12 +142,15 @@ if "reg" in args.model_type:
 else:
 	logger.info('  covert train_y to one hot shape')
 	assert len(bincounts) == 1, "support only one y value"
-	categ = int(max(bincounts[0].keys()))
+	categ = int(max(bincounts[0].keys())) + 1
 	# covert to np array to minus 1 to get zero based value
-	train_y = to_categorical(np.array(train_y) - 1, categ)
-	dev_y = to_categorical(np.array(dev_y) - 1, categ)
-	test_y = to_categorical(np.array(test_y) - 1, categ)
-	
+# 	train_y = to_categorical(np.array(train_y) - 1, categ)
+# 	dev_y = to_categorical(np.array(dev_y) - 1, categ)
+# 	test_y = to_categorical(np.array(test_y) - 1, categ)
+	train_y = to_categorical(train_y, categ)
+	dev_y = to_categorical(dev_y, categ)
+	test_y = to_categorical(test_y, categ)
+		
 ###############################################################################################################################
 ## Optimizaer algorithm
 #

@@ -35,7 +35,7 @@ def create_model(args, initial_mean_value, overal_maxlen, vocab):
 			initial_mean_value = np.expand_dims(initial_mean_value, axis=1)
 		num_outputs = len(initial_mean_value)
 	else:
-		num_outputs = int(max(initial_mean_value.keys()))
+		num_outputs = int(max(initial_mean_value.keys())) + 1
 
 
 	###############################################################################################################################
