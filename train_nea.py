@@ -71,9 +71,10 @@ from keras.preprocessing import sequence
 (train_x, train_y, train_pmt), (dev_x, dev_y, dev_pmt), (test_x, test_y, test_pmt), vocab, vocab_size, overal_maxlen, num_outputs = dataset.get_data(
 	(args.train_path, args.dev_path, args.test_path), args.prompt_id, args.vocab_size, args.maxlen, tokenize_text=True, to_lower=True, sort_by_len=False, vocab_path=args.vocab_path)
 
-# Dump vocab
-with open(out_dir + '/vocab.pkl', 'wb') as vocab_file:
-	pk.dump(vocab, vocab_file)
+if not args.vocab_path:
+	# Dump vocab
+	with open(out_dir + '/vocab.pkl', 'wb') as vocab_file:
+		pk.dump(vocab, vocab_file)
 
 # Pad sequences for mini-batch processing
 if args.model_type in {'breg', 'bregp'}:

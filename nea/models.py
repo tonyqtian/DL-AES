@@ -1,6 +1,5 @@
 import numpy as np
 import logging
-from keras.backend.tensorflow_backend import dropout
 
 logger = logging.getLogger(__name__)
 
@@ -41,19 +40,19 @@ def create_model(args, initial_mean_value, overal_maxlen, vocab):
 	###############################################################################################################################
 	## Initialize embeddings if requested
 	#
-	my_trainable = True
+	my_trainable = False
 	if args.emb_path:
 		def my_init(shape, name=None):
 			from nea.w2vEmbReader import W2VEmbReader as EmbReader
 			logger.info('Initializing lookup table')
 			emb_reader = EmbReader(args.emb_path, emb_dim=args.emb_dim)
 			emb_matrix = np.random.random(shape)
-			logger.info(' initial matrix \n %s ' % (emb_matrix,))
+# 			logger.info(' initial matrix \n %s ' % (emb_matrix,))
 			emb_matrix = emb_reader.get_emb_matrix_given_vocab(vocab, emb_matrix)
 # 			from keras.backend import set_value, get_value
 # 			set_value(model.layers[model.emb_index].W, get_value(emb_reader.get_emb_matrix_given_vocab(vocab, model.layers[model.emb_index].W)))
 # 			model.layers[model.emb_index].W.set_value(emb_reader.get_emb_matrix_given_vocab(vocab, model.layers[model.emb_index].W.get_value()))
-			logger.info(' pre-trained matrix \n %s ' % (emb_matrix,))
+# 			logger.info(' pre-trained matrix \n %s ' % (emb_matrix,))
 			return K.variable(emb_matrix, name=name)
 		logger.info(' Use pre-trained embedding')
 	else:

@@ -38,15 +38,9 @@ def get_score_range(prompt_id):
 	return asap_ranges[prompt_id]
 
 
-def sentence_cleaner(text):
-	# prepare for word based processing
-# 	re4 = re.compile(r'\.\.+')
-# 	re5 = re.compile(r' +')
-
-# 	text = text.lower()
-# 	text = re4.sub(' <3dot> ', text)
-
-	text = text.replace('â€™', '’')
+def sentence_cleaner(text, lower=False):
+	if lower:
+		text = text.lower()
 	
 	text = text.replace('can’t', 'cannot')
 	text = text.replace('it’s', 'it is')
@@ -56,7 +50,7 @@ def sentence_cleaner(text):
 	text = text.replace('’ve', ' have')
 	text = text.replace('’d', ' would')
 	text = text.replace('’m', ' am')
-
+	
 	text = text.replace('can`t', 'cannot')
 	text = text.replace('it`s', 'it is')
 	text = text.replace('n`t', ' not')
@@ -65,7 +59,7 @@ def sentence_cleaner(text):
 	text = text.replace('`ve', ' have')
 	text = text.replace('`d', ' would')
 	text = text.replace('`m', ' am')
-
+	
 	text = text.replace("can't", "cannot")
 	text = text.replace("it's", "it is")
 	text = text.replace("n't", " not")
@@ -74,14 +68,37 @@ def sentence_cleaner(text):
 	text = text.replace("'ve", " have")
 	text = text.replace("'d", " would")
 	text = text.replace("'m", " am")
-		
+	
+	#for ASAP text
+	text = text.replace("&lt;", " ")
+	text = text.replace('â€™', ' ')
+	text = text.replace('â€\x9d', ' ')
+	text = text.replace('â€œ', ' ')
+	text = text.replace('¶', ' ')
+	if lower:
+		text = text.replace("lüsted", "")
+		text = text.replace("minfong", "")
+	else:
+		text = text.replace("Lüsted", "")
+		text = text.replace("Minfong", "")
+	text = text.replace(" didnt ", " did not ")
+	text = text.replace(" shouldnt ", " should not ")
+	text = text.replace(" doesnt ", " does not ")
+	text = text.replace(" wasnt ", " was not ")
+	text = text.replace(" isnt ", " is not ")
+	text = text.replace(" cant ", " cannot ")
+	text = text.replace("travelling", "traveling")
+	if lower:
+		text = re.sub(r'@([A-Za-z])+\d+', lambda pat: pat.group().strip('@1234567890').lower(), text)
+	else:
+		text = re.sub(r'@([A-Z])+\d+', lambda pat: pat.group().strip('@1234567890').lower(), text)
+
 	text = text.replace('…', ' … ')
 	text = text.replace('”', ' ” ')
 	text = text.replace('“', ' “ ')
 	text = text.replace('/', ' / ')
 	text = text.replace('‘', ' ‘ ')
 	text = text.replace('’', ' ’ ')
-	text = text.replace('–', ' - ')
 	
 	text = text.replace(',', ' , ')
 	text = text.replace('.', ' . ')
@@ -92,13 +109,14 @@ def sentence_cleaner(text):
 	text = text.replace(':', ' : ')
 	text = text.replace("'", " ' ")
 	text = text.replace('?', ' ? ')
+	text = text.replace('!', ' ! ')
 	text = text.replace(';', ' ; ')
 	
-# 	text = text.replace('<3dot>', ' ... ')
-	text = text.replace('"', '')
-
-# 	text = re5.sub(' ', text)
-# 	text = text.replace('\n', ' <nl> ')
+	text = text.replace('-', ' ')
+	text = text.replace('+', ' ')
+	text = text.replace('#', ' ')    
+	text = text.replace('"', ' ')
+	
 	return text
 
 def get_model_friendly_scores(scores_array, prompt_id_array):
@@ -162,9 +180,7 @@ def create_vocab(file_path, prompt_id, maxlen, vocab_size, tokenize_text, to_low
 			content = tokens[2].strip()
 			score = float(tokens[6])
 			if essay_set == prompt_id or prompt_id <= 0:
-				content = sentence_cleaner(content)
-				if to_lower:
-					content = content.lower()
+				content = sentence_cleaner(content, to_lower)
 				if tokenize_text:
 					content = tokenize(content)
 				else:
@@ -208,7 +224,7 @@ def create_vocab(file_path, prompt_id, maxlen, vocab_size, tokenize_text, to_low
 # 				essays_ids.append(int(tokens[0]))
 # 	return essays_list, essays_ids
 
-def read_dataset(file_path, prompt_id, maxlen, vocab, tokenize_text, to_lower, score_index=6, char_level=False):
+def read_dataset(file_path, prompt_id, maxlen, vocab, tokenize_text, to_lower, score_index=6):
 	logger.info('Reading dataset from: ' + file_path)
 	if maxlen > 0:
 		logger.info('  Removing sequences with more than ' + str(maxlen) + ' words')
@@ -224,33 +240,26 @@ def read_dataset(file_path, prompt_id, maxlen, vocab, tokenize_text, to_lower, s
 			content = tokens[2].strip()
 			score = float(tokens[score_index])
 			if essay_set == prompt_id or prompt_id <= 0:
-				content = sentence_cleaner(content)
-				if to_lower:
-					content = content.lower()
-				if char_level:
-					#content = list(content)
-					raise NotImplementedError
+				content = sentence_cleaner(content, to_lower)
+				if tokenize_text:
+					content = tokenize(content)
 				else:
-					if tokenize_text:
-						content = tokenize(content)
-					else:
-						content = content.split()
+					content = content.split()
 				if maxlen > 0 and len(content) > maxlen:
 					continue
 				indices = []
-				if char_level:
-					raise NotImplementedError
-				else:
-					for word in content:
-						if is_number(word):
-							indices.append(vocab['<num>'])
-							num_hit += 1
-						elif word in vocab:
-							indices.append(vocab[word])
-						else:
-							indices.append(vocab['<unk>'])
-							unk_hit += 1
-						total += 1
+
+				for word in content:
+					if word in vocab:
+						indices.append(vocab[word])
+					elif is_number(word):
+						indices.append(vocab['<num>'])
+						num_hit += 1						
+					else:
+						indices.append(vocab['<unk>'])
+						unk_hit += 1
+					total += 1
+					
 				data_x.append(indices)
 				data_y.append(score)
 				prompt_ids.append(essay_set)
@@ -259,7 +268,7 @@ def read_dataset(file_path, prompt_id, maxlen, vocab, tokenize_text, to_lower, s
 	logger.info('  <num> hit rate: %.2f%%, <unk> hit rate: %.2f%%' % (100*num_hit/total, 100*unk_hit/total))
 	return data_x, data_y, prompt_ids, maxlen_x
 
-def get_data(paths, prompt_id, vocab_size, maxlen, tokenize_text=True, to_lower=True, sort_by_len=False, vocab_path=None, score_index=6):
+def get_data(paths, prompt_id, vocab_size, maxlen, tokenize_text=False, to_lower=True, sort_by_len=False, vocab_path=None, score_index=6):
 	train_path, dev_path, test_path = paths[0], paths[1], paths[2]
 	
 	if not vocab_path:
