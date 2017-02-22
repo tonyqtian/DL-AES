@@ -40,7 +40,7 @@ def create_model(args, initial_mean_value, overal_maxlen, vocab):
 	###############################################################################################################################
 	## Initialize embeddings if requested
 	#
-	my_trainable = False
+	my_trainable = True
 	if args.emb_path:
 		def my_init(shape, name=None):
 			from nea.w2vEmbReader import W2VEmbReader as EmbReader
