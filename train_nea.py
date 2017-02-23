@@ -211,8 +211,10 @@ logger.info('  Done')
 ###############################################################################################################################
 ## Evaluator
 #
-
-evl = Evaluator(args, out_dir, dev_x, test_x, dev_y, test_y, dev_y_org, test_y_org)
+if args.model_type == 'mlp':
+	evl = Evaluator(args, out_dir, dev_x, test_x, dev_y, test_y, dev_y_org, test_y_org, use_tfidf=True, dev_pca=dev_pca, test_pca=test_pca)
+else:
+	evl = Evaluator(args, out_dir, dev_x, test_x, dev_y, test_y, dev_y_org, test_y_org)
 
 ###############################################################################################################################
 ## Training
@@ -228,7 +230,10 @@ total_eval_time = 0
 for ii in range(args.epochs):
 	# Training
 	t0 = time()
-	train_history = model.fit(train_x, train_y, batch_size=args.batch_size, nb_epoch=1, verbose=0)
+	if args.model_type == 'mlp':
+		train_history = model.fit([train_x, train_pca], train_y, batch_size=args.batch_size, nb_epoch=1, verbose=0)
+	else:
+		train_history = model.fit(train_x, train_y, batch_size=args.batch_size, nb_epoch=1, verbose=0)
 	tr_time = time() - t0
 	total_train_time += tr_time
 	

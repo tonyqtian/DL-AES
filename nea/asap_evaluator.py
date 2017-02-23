@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 class Evaluator():
 	
-	def __init__(self, arg, out_dir, dev_x, test_x, dev_y, test_y, dev_y_org, test_y_org):
+	def __init__(self, arg, out_dir, dev_x, test_x, dev_y, test_y, dev_y_org, test_y_org, use_tfidf=False, dev_pca=None, test_pca=None):
 		self.arg = arg
 		self.prompt_id = self.arg.prompt_id
 		self.out_dir = out_dir
@@ -29,6 +29,9 @@ class Evaluator():
 		self.batch_size = 180
 		self.low, self.high = dataset.get_score_range(self.prompt_id)
 		self.dump_ref_scores()
+		self.dev_pca = dev_pca
+		self.test_pca = test_pca
+		self.use_tfidf = use_tfidf
 	
 	def dump_ref_scores(self):
 		np.savetxt(self.out_dir + '/preds/dev_ref.txt', self.dev_y_org, fmt='%i')
@@ -58,11 +61,19 @@ class Evaluator():
 		return dev_qwk, test_qwk, dev_lwk, test_lwk
 	
 	def evaluate(self, model, epoch, print_info=False):
-		self.dev_loss, self.dev_metric = model.evaluate(self.dev_x, self.dev_y, batch_size=self.batch_size, verbose=0)
-		self.test_loss, self.test_metric = model.evaluate(self.test_x, self.test_y, batch_size=self.batch_size, verbose=0)
-		
-		self.dev_pred = model.predict(self.dev_x, batch_size=self.batch_size).squeeze()
-		self.test_pred = model.predict(self.test_x, batch_size=self.batch_size).squeeze()
+		if self.use_tfidf:
+			self.dev_loss, self.dev_metric = model.evaluate([self.dev_x, self.dev_pca], self.dev_y, batch_size=self.batch_size, verbose=0)
+			self.test_loss, self.test_metric = model.evaluate([self.test_x, self.test_pca], self.test_y, batch_size=self.batch_size, verbose=0)
+		else:
+			self.dev_loss, self.dev_metric = model.evaluate(self.dev_x, self.dev_y, batch_size=self.batch_size, verbose=0)
+			self.test_loss, self.test_metric = model.evaluate(self.test_x, self.test_y, batch_size=self.batch_size, verbose=0)
+
+		if self.use_tfidf:
+			self.dev_pred = model.predict([self.dev_x, self.dev_pca], batch_size=self.batch_size).squeeze()
+			self.test_pred = model.predict([self.test_x, self.test_pca], batch_size=self.batch_size).squeeze()
+		else:		
+			self.dev_pred = model.predict(self.dev_x, batch_size=self.batch_size).squeeze()
+			self.test_pred = model.predict(self.test_x, batch_size=self.batch_size).squeeze()
 		
 		if "reg" in self.arg.model_type:
 			self.dev_pred = dataset.convert_to_dataset_friendly_scores(self.dev_pred, self.prompt_id)

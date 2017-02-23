@@ -3,7 +3,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-def create_model(args, initial_mean_value, overal_maxlen, vocab):
+def create_model(args, initial_mean_value, overal_maxlen, vocab, pca_len=50):
 	
 	import keras.backend as K
 	from keras.layers.embeddings import Embedding
@@ -93,12 +93,14 @@ def create_model(args, initial_mean_value, overal_maxlen, vocab):
 	elif args.model_type == 'mlp':
 		logger.info('Building a linear model with POOLING')
 		sequence = Input(shape=(overal_maxlen,), dtype='int32')
+		pca_input = Input(shape=(pca_len,), dtype='float32')
 		x = Embedding(args.vocab_size, args.emb_dim, mask_zero=True, init=my_init, trainable=my_trainable)(sequence)
 		x = MeanOverTime(mask_zero=True)(x)
-		x = Dense(32, activation='tanh')(x)
-		x = Dropout(args.dropout_prob)(x)
-		predictions = Dense(num_outputs, activation='softmax')(x)
-		model = Model(input=sequence, output=predictions)
+		z = merge([x,pca_input], mode='concat')
+		z = Dense(32, activation='tanh')(z)
+		z = Dropout(args.dropout_prob)(z)
+		predictions = Dense(num_outputs, activation='softmax')(z)
+		model = Model(input=[sequence, pca_input], output=predictions)
 				
 	elif args.model_type == 'reg':
 		logger.info('Building a REGRESSION model')
