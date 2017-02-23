@@ -20,7 +20,7 @@ parser.add_argument("-tu", "--tune", dest="dev_path", type=str, metavar='<str>',
 parser.add_argument("-ts", "--test", dest="test_path", type=str, metavar='<str>', required=True, help="The path to the test set")
 parser.add_argument("-o", "--out-dir", dest="out_dir_path", type=str, metavar='<str>', required=True, help="The path to the output directory")
 parser.add_argument("-p", "--prompt", dest="prompt_id", type=int, metavar='<int>', required=False, help="Promp ID for ASAP dataset. '0' means all prompts.")
-parser.add_argument("-t", "--type", dest="model_type", type=str, metavar='<str>', default='regp', help="Model type (cls|clsp|reg|regp|breg|bregp) (default=regp)")
+parser.add_argument("-m", "--type", dest="model_type", type=str, metavar='<str>', default='regp', help="Model type (cls|clsp|reg|regp|breg|bregp) (default=regp)")
 parser.add_argument("-u", "--rec-unit", dest="recurrent_unit", type=str, metavar='<str>', default='lstm', help="Recurrent unit type (lstm|gru|simple) (default=lstm)")
 parser.add_argument("-a", "--algorithm", dest="algorithm", type=str, metavar='<str>', default='rmsprop', help="Optimization algorithm (rmsprop|sgd|adagrad|adadelta|adam|adamax) (default=rmsprop)")
 parser.add_argument("-l", "--loss", dest="loss", type=str, metavar='<str>', default='mse', help="Loss function (mse|mae|cnp) (default=mse)")
@@ -46,7 +46,7 @@ U.mkdir_p(out_dir + '/preds')
 U.set_logger(out_dir)
 U.print_args(args)
 
-assert args.model_type in {'cls', 'clsp', 'reg', 'regp', 'breg', 'bregp'}
+assert args.model_type in {'mlp', 'cls', 'clsp', 'reg', 'regp', 'breg', 'bregp'}
 assert args.algorithm in {'rmsprop', 'sgd', 'adagrad', 'adadelta', 'adam', 'adamax'}
 assert args.loss in {'mse', 'mae', 'cnp'}
 assert args.recurrent_unit in {'lstm', 'gru', 'simple'}
@@ -73,13 +73,17 @@ from keras.preprocessing import sequence
 (train_x, train_y, train_pmt), (dev_x, dev_y, dev_pmt), (test_x, test_y, test_pmt), vocab, vocab_size, overal_maxlen, num_outputs = dataset.get_data(
 	(args.train_path, args.dev_path, args.test_path), args.prompt_id, args.vocab_size, args.maxlen, tokenize_text=True, to_lower=True, sort_by_len=False, vocab_path=args.vocab_path)
 
+train_pca, TfIdf, Pca = dataset.get_tfidf(args.train_path, args.prompt_id, training_material=True)
+dev_pca, _, _ = dataset.get_tfidf(args.dev_path, args.prompt_id, tfidf=TfIdf, pca=Pca, training_material=False)
+test_pca, _, _ = dataset.get_tfidf(args.test_path, args.prompt_id, tfidf=TfIdf, pca=Pca, training_material=False)
+
 if not args.vocab_path:
 	# Dump vocab
 	with open(out_dir + '/vocab.pkl', 'wb') as vocab_file:
 		pk.dump(vocab, vocab_file)
 
 # Pad sequences for mini-batch processing
-if args.model_type in {'breg', 'bregp', 'clsp'}:
+if args.model_type in {'breg', 'bregp', 'clsp', 'mlp'}:
 	assert args.rnn_dim > 0
 	assert args.recurrent_unit == 'lstm'
 	train_x = sequence.pad_sequences(train_x, maxlen=overal_maxlen)

@@ -1,7 +1,7 @@
 # import random
 import codecs
 # import sys
-import nltk
+from nltk.tokenize import word_tokenize
 import logging
 import re
 import numpy as np
@@ -27,7 +27,7 @@ def get_ref_dtype():
 	return ref_scores_dtype
 
 def tokenize(string):
-	tokens = nltk.word_tokenize(string)
+	tokens = word_tokenize(string)
 # 	for index, token in enumerate(tokens):
 # 		if token == '@' and (index+1) < len(tokens):
 # 			tokens[index+1] = '@' + re.sub('[0-9]+.*', '', tokens[index+1])
@@ -37,6 +37,86 @@ def tokenize(string):
 def get_score_range(prompt_id):
 	return asap_ranges[prompt_id]
 
+def tokenize_cleaner(text, lower=True):
+	if lower:
+		text = text.lower()
+	
+	text = text.replace('can’t', 'cannot')
+	text = text.replace('it’s', 'it is')
+	text = text.replace('n’t', ' not')
+	text = text.replace('’ll', ' will')
+	text = text.replace('’s', ' ’s')
+	text = text.replace('’ve', ' have')
+	text = text.replace('’d', ' would')
+	text = text.replace('’m', ' am')
+	
+	text = text.replace('can`t', 'cannot')
+	text = text.replace('it`s', 'it is')
+	text = text.replace('n`t', ' not')
+	text = text.replace('`ll', ' will')
+	text = text.replace('`s', ' ’s')
+	text = text.replace('`ve', ' have')
+	text = text.replace('`d', ' would')
+	text = text.replace('`m', ' am')
+	
+	text = text.replace("can't", "cannot")
+	text = text.replace("it's", "it is")
+	text = text.replace("n't", " not")
+	text = text.replace("'ll", " will")
+	text = text.replace("'s", " ’s")
+	text = text.replace("'ve", " have")
+	text = text.replace("'d", " would")
+	text = text.replace("'m", " am")
+	
+	#for ASAP text
+	text = text.replace("&lt;", " ")
+	text = text.replace('â€™', ' ')
+	text = text.replace('â€\x9d', ' ')
+	text = text.replace('â€œ', ' ')
+	text = text.replace('¶', ' ')
+	if lower:
+		text = text.replace("lüsted", "")
+		text = text.replace("minfong", "")
+	else:
+		text = text.replace("Lüsted", "")
+		text = text.replace("Minfong", "")
+	text = text.replace(" didnt ", " did not ")
+	text = text.replace(" shouldnt ", " should not ")
+	text = text.replace(" doesnt ", " does not ")
+	text = text.replace(" wasnt ", " was not ")
+	text = text.replace(" isnt ", " is not ")
+	text = text.replace(" cant ", " cannot ")
+	text = text.replace("travelling", "traveling")
+	if lower:
+		text = re.sub(r'@([A-Za-z])+\d+', lambda pat: pat.group().strip('@1234567890').lower(), text)
+	else:
+		text = re.sub(r'@([A-Z])+\d+', lambda pat: pat.group().strip('@1234567890').lower(), text)
+
+	text = text.replace('…', ' ')
+	text = text.replace('”', ' ')
+	text = text.replace('“', ' ')
+	text = text.replace('‘', ' ')
+	text = text.replace('’', ' ')
+	
+	text = text.replace(',', ' ')
+	text = text.replace('.', ' ')
+	text = text.replace('(', ' ')
+	text = text.replace(')', ' ')
+	text = text.replace('[', ' ')
+	text = text.replace(']', ' ')
+	text = text.replace(':', ' ')
+	text = text.replace("'", " ")
+	text = text.replace('?', ' ')
+	text = text.replace('!', ' ')
+	text = text.replace(';', ' ')
+	text = text.replace('&', ' ')
+	text = text.replace('/', ' ')
+	text = text.replace('-', ' ')
+	text = text.replace('+', ' ')
+	text = text.replace('#', ' ')    
+	text = text.replace('"', ' ')
+	
+	return text
 
 def sentence_cleaner(text, lower=False):
 	if lower:
@@ -223,6 +303,35 @@ def create_vocab(file_path, prompt_id, maxlen, vocab_size, tokenize_text, to_low
 # 				essays_list.append(tokens[2].strip())
 # 				essays_ids.append(int(tokens[0]))
 # 	return essays_list, essays_ids
+
+def get_tfidf(file_path, prompt_id=-1, tfidf_dim=2000, pca_dim=50, tfidf=None, pca=None, training_material=True):
+	logger.info('<TF/IDF> Reading dataset from: ' + file_path)
+	data_x = []
+	with codecs.open(file_path, mode='r', encoding='UTF8') as input_file:
+		next(input_file)
+		for line in input_file:
+			tokens = line.strip().split('\t')
+			essay_id = int(tokens[0])
+			essay_set = int(tokens[1])
+			content = tokens[2].strip()
+			if essay_set == prompt_id or prompt_id <= 0:
+				data_x.append(content)
+		if training_material:
+			from sklearn.feature_extraction.text import TfidfVectorizer
+			tfidf = TfidfVectorizer(preprocessor=tokenize_cleaner, analyzer='word', max_features=tfidf_dim, tokenizer=word_tokenize, stop_words = 'english')
+			tfidf_matrix =  tfidf.fit_transform(data_x)
+		else:
+			tfidf_matrix =  tfidf.transform(data_x)
+		if training_material:
+			from sklearn.decomposition import PCA
+			pca = PCA(n_components=pca_dim)
+			pca.fit(tfidf_matrix.todense())
+			pca_matrix = pca.fit_transform(tfidf_matrix.todense())
+		else:
+			pca_matrix = pca.transform(tfidf_matrix.todense())
+# 		feature_names = tfidf.get_feature_names()
+	logger.info('<TF/IDF> PCA matrix: ' + str(pca_matrix.shape))
+	return pca_matrix, tfidf, pca
 
 def read_dataset(file_path, prompt_id, maxlen, vocab, tokenize_text, to_lower, score_index=6):
 	logger.info('Reading dataset from: ' + file_path)
