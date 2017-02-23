@@ -10,6 +10,7 @@ def create_model(args, initial_mean_value, overal_maxlen, vocab):
 	from keras.models import Sequential, Model
 	from keras.layers.core import Dense, Dropout, Activation
 	from nea.my_layers import Attention, MeanOverTime, Conv1DWithMasking
+	from keras.engine.topology import Input, merge
 	
 	###############################################################################################################################
 	## Recurrence unit type
@@ -36,7 +37,6 @@ def create_model(args, initial_mean_value, overal_maxlen, vocab):
 	else:
 		num_outputs = initial_mean_value
 
-
 	###############################################################################################################################
 	## Initialize embeddings if requested
 	#
@@ -60,27 +60,46 @@ def create_model(args, initial_mean_value, overal_maxlen, vocab):
 		logger.info(' Use default initializing embedding')
 	
 	if args.model_type == 'cls':
-		raise NotImplementedError
+		logger.info('Building a CLASSIFICATION model')
+		sequence = Input(shape=(overal_maxlen,), dtype='int32')
+		x = Embedding(args.vocab_size, args.emb_dim, mask_zero=True, init=my_init, trainable=my_trainable)(sequence)
+		if args.cnn_dim > 0:
+			x = Conv1DWithMasking(nb_filter=args.cnn_dim, filter_length=args.cnn_window_size, border_mode=cnn_border_mode, subsample_length=1)(x)
+		if args.rnn_dim > 0:
+			x = RNN(args.rnn_dim, return_sequences=True, dropout_W=dropout_W, dropout_U=dropout_U)(x)
+		predictions = Dense(num_outputs, activation='softmax')(x)
+		model = Model(input=sequence, output=predictions)
 
 	elif args.model_type == 'clsp':
 		logger.info('Building a CLASSIFICATION model with POOLING')
-		model = Sequential()
-		model.add(Embedding(args.vocab_size, args.emb_dim, mask_zero=True, init=my_init, trainable=my_trainable))
+		sequence = Input(shape=(overal_maxlen,), dtype='int32')
+		x = Embedding(args.vocab_size, args.emb_dim, mask_zero=True, init=my_init, trainable=my_trainable)(sequence)
 		if args.cnn_dim > 0:
-			model.add(Conv1DWithMasking(nb_filter=args.cnn_dim, filter_length=args.cnn_window_size, border_mode=cnn_border_mode, subsample_length=1))
+			x = Conv1DWithMasking(nb_filter=args.cnn_dim, filter_length=args.cnn_window_size, border_mode=cnn_border_mode, subsample_length=1)(x)
 		if args.rnn_dim > 0:
-			model.add(RNN(args.rnn_dim, return_sequences=True, dropout_W=dropout_W, dropout_U=dropout_U))
-# 		if args.dropout_prob > 0:
-# 			model.add(Dropout(args.dropout_prob))
-		if args.aggregation == 'mot':
-			model.add(MeanOverTime(mask_zero=True))
-		elif args.aggregation.startswith('att'):
-			model.add(Attention(op=args.aggregation, activation='tanh', init_stdev=0.01))
-		model.add(Dense(32, activation='tanh'))
+			forwards = RNN(args.rnn_dim, return_sequences=True, dropout_W=dropout_W, dropout_U=dropout_U)(x)
+# 			backwards = RNN(args.rnn_dim, return_sequences=True, dropout_W=dropout_W, dropout_U=dropout_U, go_backwards=True)(output)
 		if args.dropout_prob > 0:
-			model.add(Dropout(args.dropout_prob))
-		model.add(Dense(num_outputs, activation='softmax'))
-		
+			forwards = Dropout(args.dropout_prob)(forwards)
+# 			backwards = Dropout(args.dropout_prob)(backwards)
+		forwards_mean = MeanOverTime(mask_zero=True)(forwards)
+# 		backwards_mean = MeanOverTime(mask_zero=True)(backwards)
+# 		merged = merge([forwards_mean, backwards_mean], mode='concat', concat_axis=-1)
+# 		densed = Dense(32, activation='tanh')(forwards_mean)
+# 		droped = Dropout(args.dropout_prob)(densed)
+		predictions = Dense(num_outputs, activation='softmax')(forwards_mean)
+		model = Model(input=sequence, output=predictions)
+
+	elif args.model_type == 'mlp':
+		logger.info('Building a linear model with POOLING')
+		sequence = Input(shape=(overal_maxlen,), dtype='int32')
+		x = Embedding(args.vocab_size, args.emb_dim, mask_zero=True, init=my_init, trainable=my_trainable)(sequence)
+		x = MeanOverTime(mask_zero=True)(x)
+		x = Dense(32, activation='tanh')(x)
+		x = Dropout(args.dropout_prob)(x)
+		predictions = Dense(num_outputs, activation='softmax')(x)
+		model = Model(input=sequence, output=predictions)
+				
 	elif args.model_type == 'reg':
 		logger.info('Building a REGRESSION model')
 		model = Sequential()
@@ -96,7 +115,6 @@ def create_model(args, initial_mean_value, overal_maxlen, vocab):
 			bias_value = (np.log(initial_mean_value) - np.log(1 - initial_mean_value)).astype(K.floatx())
 			model.layers[-1].b.set_value(bias_value)
 		model.add(Activation('sigmoid'))
-# 		model.emb_index = 0
 	
 	elif args.model_type == 'regp':
 		logger.info('Building a REGRESSION model with POOLING')
@@ -118,12 +136,9 @@ def create_model(args, initial_mean_value, overal_maxlen, vocab):
 # 			model.layers[-1].b.set_value(bias_value)
 			K.set_value(model.layers[-1].b, bias_value)
 		model.add(Activation('sigmoid'))
-# 		model.emb_index = 0
 	
 	elif args.model_type == 'breg':
 		logger.info('Building a BIDIRECTIONAL REGRESSION model')
-		from keras.engine.topology import Input, merge
-# 		model = Sequential()
 		sequence = Input(shape=(overal_maxlen,), dtype='int32')
 		output = Embedding(args.vocab_size, args.emb_dim, mask_zero=True, init=my_init, trainable=my_trainable)(sequence)
 		if args.cnn_dim > 0:
@@ -140,12 +155,9 @@ def create_model(args, initial_mean_value, overal_maxlen, vocab):
 			raise NotImplementedError
 		score = Activation('sigmoid')(densed)
 		model = Model(input=sequence, output=score)
-# 		model.emb_index = 1
 	
 	elif args.model_type == 'bregp':
 		logger.info('Building a BIDIRECTIONAL REGRESSION model with POOLING')
-		from keras.engine.topology import Input, merge
-# 		model = Sequential()
 		sequence = Input(shape=(overal_maxlen,), dtype='int32')
 		output = Embedding(args.vocab_size, args.emb_dim, mask_zero=True, init=my_init, trainable=my_trainable)(sequence)
 		if args.cnn_dim > 0:
@@ -164,7 +176,6 @@ def create_model(args, initial_mean_value, overal_maxlen, vocab):
 			raise NotImplementedError
 		score = Activation('sigmoid')(densed)
 		model = Model(input=sequence, output=score)
-# 		model.emb_index = 1
 	
 	logger.info('  Done')
 		

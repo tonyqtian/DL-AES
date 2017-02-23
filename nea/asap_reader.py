@@ -28,10 +28,10 @@ def get_ref_dtype():
 
 def tokenize(string):
 	tokens = nltk.word_tokenize(string)
-	for index, token in enumerate(tokens):
-		if token == '@' and (index+1) < len(tokens):
-			tokens[index+1] = '@' + re.sub('[0-9]+.*', '', tokens[index+1])
-			tokens.pop(index)
+# 	for index, token in enumerate(tokens):
+# 		if token == '@' and (index+1) < len(tokens):
+# 			tokens[index+1] = '@' + re.sub('[0-9]+.*', '', tokens[index+1])
+# 			tokens.pop(index)
 	return tokens
 
 def get_score_range(prompt_id):

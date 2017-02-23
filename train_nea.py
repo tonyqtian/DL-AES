@@ -79,7 +79,7 @@ if not args.vocab_path:
 		pk.dump(vocab, vocab_file)
 
 # Pad sequences for mini-batch processing
-if args.model_type in {'breg', 'bregp'}:
+if args.model_type in {'breg', 'bregp', 'clsp'}:
 	assert args.rnn_dim > 0
 	assert args.recurrent_unit == 'lstm'
 	train_x = sequence.pad_sequences(train_x, maxlen=overal_maxlen)
