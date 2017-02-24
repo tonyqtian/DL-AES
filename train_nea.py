@@ -43,7 +43,7 @@ parser.add_argument("--maxlen", dest="maxlen", type=int, metavar='<int>', defaul
 parser.add_argument("--seed", dest="seed", type=int, metavar='<int>', default=1234, help="Random seed (default=1234)")
 parser.add_argument("--tfidf", dest="tfidf", type=int, metavar='<int>', default=0, help="Concatenate tf-idf matrix with model output (default dim=0)")
 parser.add_argument("--dense", dest="dense", type=int, metavar='<int>', default=0, help="Add dense layer before final full connected layer")
-parser.add_argument("--learning-rate", dest="learning_rate", type=int, metavar='<int>', default=0, help="Optimizer learning rate")
+parser.add_argument("--learning-rate", dest="learning_rate", type=float, metavar='<int>', default=0.0, help="Optimizer learning rate")
 parser.add_argument("--bi", dest="bi", action='store_true', help="Use bi-directional RNN")
 parser.add_argument("--plot", dest="plot", action='store_true', help="Save PNG plot")
 args = parser.parse_args()
