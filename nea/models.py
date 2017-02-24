@@ -6,7 +6,6 @@ logger = logging.getLogger(__name__)
 def create_model(args, initial_mean_value, overal_maxlen, vocab, pca_len=50):
 	
 	import keras.backend as K
-	from keras.layers.wrappers import TimeDistributed
 	from keras.layers.embeddings import Embedding
 	from keras.models import Sequential, Model
 	from keras.layers.core import Dense, Dropout, Activation

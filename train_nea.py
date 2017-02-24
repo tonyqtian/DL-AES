@@ -20,12 +20,12 @@ parser.add_argument("-tu", "--tune", dest="dev_path", type=str, metavar='<str>',
 parser.add_argument("-ts", "--test", dest="test_path", type=str, metavar='<str>', required=True, help="The path to the test set")
 parser.add_argument("-o", "--out-dir", dest="out_dir_path", type=str, metavar='<str>', required=True, help="The path to the output directory")
 parser.add_argument("-p", "--prompt", dest="prompt_id", type=int, metavar='<int>', required=False, help="Promp ID for ASAP dataset. '0' means all prompts.")
-parser.add_argument("-m", "--type", dest="model_type", type=str, metavar='<str>', default='regp', help="Model type (cls|clsp|reg|regp|breg|bregp) (default=regp)")
+parser.add_argument("-m", "--model-type", dest="model_type", type=str, metavar='<str>', default='regp', help="Model type (cls|clsp|reg|regp|breg|bregp) (default=regp)")
 parser.add_argument("-u", "--rec-unit", dest="recurrent_unit", type=str, metavar='<str>', default='lstm', help="Recurrent unit type (lstm|gru|simple) (default=lstm)")
 parser.add_argument("-a", "--algorithm", dest="algorithm", type=str, metavar='<str>', default='rmsprop', help="Optimization algorithm (rmsprop|sgd|adagrad|adadelta|adam|adamax) (default=rmsprop)")
 parser.add_argument("-l", "--loss", dest="loss", type=str, metavar='<str>', default='mse', help="Loss function (mse|mae|cnp) (default=mse) set to cnp if cls model")
 parser.add_argument("-e", "--embdim", dest="emb_dim", type=int, metavar='<int>', default=50, help="Embeddings dimension (default=50)")
-parser.add_argument("-c", "--cnndim", dest="cnn_dim", type=int, metavar='<int>', default=0, help="CNN output dimension. '0' means no CNN layer (default=0)")
+parser.add_argument("-c", "--cnn-kernel", dest="cnn_dim", type=int, metavar='<int>', default=0, help="CNN output dimension. '0' means no CNN layer (default=0)")
 parser.add_argument("-w", "--cnnwin", dest="cnn_window_size", type=int, metavar='<int>', default=3, help="CNN window size. (default=3)")
 parser.add_argument("-r", "--rnndim", dest="rnn_dim", type=int, metavar='<int>', default=0, help="RNN dimension. '0' means no RNN layer (default=0)")
 parser.add_argument("-b", "--batch-size", dest="batch_size", type=int, metavar='<int>', default=32, help="Batch size (default=32)")
@@ -38,7 +38,7 @@ parser.add_argument("--emb", dest="emb_path", type=str, metavar='<str>', help="T
 parser.add_argument("--epochs", dest="epochs", type=int, metavar='<int>', default=50, help="Number of epochs (default=50)")
 parser.add_argument("--maxlen", dest="maxlen", type=int, metavar='<int>', default=0, help="Maximum allowed number of words during training. '0' means no limit (default=0)")
 parser.add_argument("--seed", dest="seed", type=int, metavar='<int>', default=1234, help="Random seed (default=1234)")
-parser.add_argument("--tfidf", dest="tfidf", action='store_true', help="Concatenate tf-idf matrix with model output")
+parser.add_argument("--tfidf", dest="tfidf", type=int, metavar='<int>', default=0, help="Concatenate tf-idf matrix with model output (default dim=0)")
 parser.add_argument("--dense", dest="dense", type=int, metavar='<int>', default=0, help="Add dense layer before final full connected layer")
 parser.add_argument("--bi", dest="bi", action='store_true', help="Use bi-directional RNN")
 parser.add_argument("--plot", dest="plot", action='store_true', help="Save PNG plot")
@@ -77,10 +77,10 @@ from keras.preprocessing import sequence
 (train_x, train_y, train_pmt), (dev_x, dev_y, dev_pmt), (test_x, test_y, test_pmt), vocab, vocab_size, overal_maxlen, num_outputs = dataset.get_data(
 	(args.train_path, args.dev_path, args.test_path), args.prompt_id, args.vocab_size, args.maxlen, tokenize_text=True, to_lower=True, sort_by_len=False, vocab_path=args.vocab_path)
 
-if args.tfidf:
-	train_pca, TfIdf, Pca = dataset.get_tfidf(args.train_path, args.prompt_id, training_material=True)
-	dev_pca, _, _ = dataset.get_tfidf(args.dev_path, args.prompt_id, tfidf=TfIdf, pca=Pca, training_material=False)
-	test_pca, _, _ = dataset.get_tfidf(args.test_path, args.prompt_id, tfidf=TfIdf, pca=Pca, training_material=False)
+if args.tfidf > 0:
+	train_pca, TfIdf, Pca = dataset.get_tfidf(args.train_path, args.prompt_id, pca_dim=args.tfidf, training_material=True)
+	dev_pca, _, _ = dataset.get_tfidf(args.dev_path, args.prompt_id, pca_dim=args.tfidf, tfidf=TfIdf, pca=Pca, training_material=False)
+	test_pca, _, _ = dataset.get_tfidf(args.test_path, args.prompt_id, pca_dim=args.tfidf, tfidf=TfIdf, pca=Pca, training_material=False)
 else:
 	dev_pca = None
 	test_pca = None
@@ -245,7 +245,7 @@ if args.plot:
 for ii in range(args.epochs):
 	# Training
 	t0 = time()
-	if args.tfidf:
+	if args.tfidf > 0:
 		train_history = model.fit([train_x, train_pca], train_y, batch_size=args.batch_size, nb_epoch=1, verbose=0)
 	else:
 		train_history = model.fit(train_x, train_y, batch_size=args.batch_size, nb_epoch=1, verbose=0)

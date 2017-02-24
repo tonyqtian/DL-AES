@@ -60,14 +60,14 @@ class Evaluator():
 		return dev_qwk, test_qwk, dev_lwk, test_lwk
 	
 	def evaluate(self, model, epoch, print_info=False):
-		if self.arg.tfidf:
+		if self.arg.tfidf > 0:
 			self.dev_loss, self.dev_metric = model.evaluate([self.dev_x, self.dev_pca], self.dev_y, batch_size=self.batch_size, verbose=0)
 			self.test_loss, self.test_metric = model.evaluate([self.test_x, self.test_pca], self.test_y, batch_size=self.batch_size, verbose=0)
 		else:
 			self.dev_loss, self.dev_metric = model.evaluate(self.dev_x, self.dev_y, batch_size=self.batch_size, verbose=0)
 			self.test_loss, self.test_metric = model.evaluate(self.test_x, self.test_y, batch_size=self.batch_size, verbose=0)
 
-		if self.arg.tfidf:
+		if self.arg.tfidf > 0:
 			self.dev_pred = model.predict([self.dev_x, self.dev_pca], batch_size=self.batch_size).squeeze()
 			self.test_pred = model.predict([self.test_x, self.test_pca], batch_size=self.batch_size).squeeze()
 		else:		
