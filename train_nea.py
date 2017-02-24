@@ -23,15 +23,15 @@ parser.add_argument("-p", "--prompt", dest="prompt_id", type=int, metavar='<int>
 parser.add_argument("-m", "--type", dest="model_type", type=str, metavar='<str>', default='regp', help="Model type (cls|clsp|reg|regp|breg|bregp) (default=regp)")
 parser.add_argument("-u", "--rec-unit", dest="recurrent_unit", type=str, metavar='<str>', default='lstm', help="Recurrent unit type (lstm|gru|simple) (default=lstm)")
 parser.add_argument("-a", "--algorithm", dest="algorithm", type=str, metavar='<str>', default='rmsprop', help="Optimization algorithm (rmsprop|sgd|adagrad|adadelta|adam|adamax) (default=rmsprop)")
-parser.add_argument("-l", "--loss", dest="loss", type=str, metavar='<str>', default='mse', help="Loss function (mse|mae|cnp) (default=mse)")
+parser.add_argument("-l", "--loss", dest="loss", type=str, metavar='<str>', default='mse', help="Loss function (mse|mae|cnp) (default=mse) set to cnp if cls model")
 parser.add_argument("-e", "--embdim", dest="emb_dim", type=int, metavar='<int>', default=50, help="Embeddings dimension (default=50)")
 parser.add_argument("-c", "--cnndim", dest="cnn_dim", type=int, metavar='<int>', default=0, help="CNN output dimension. '0' means no CNN layer (default=0)")
 parser.add_argument("-w", "--cnnwin", dest="cnn_window_size", type=int, metavar='<int>', default=3, help="CNN window size. (default=3)")
-parser.add_argument("-r", "--rnndim", dest="rnn_dim", type=int, metavar='<int>', default=300, help="RNN dimension. '0' means no RNN layer (default=300)")
+parser.add_argument("-r", "--rnndim", dest="rnn_dim", type=int, metavar='<int>', default=0, help="RNN dimension. '0' means no RNN layer (default=0)")
 parser.add_argument("-b", "--batch-size", dest="batch_size", type=int, metavar='<int>', default=32, help="Batch size (default=32)")
 parser.add_argument("-v", "--vocab-size", dest="vocab_size", type=int, metavar='<int>', default=4000, help="Vocab size (default=4000)")
 parser.add_argument("--aggregation", dest="aggregation", type=str, metavar='<str>', default='mot', help="The aggregation method for regp and bregp types (mot|attsum|attmean) (default=mot)")
-parser.add_argument("--dropout", dest="dropout_prob", type=float, metavar='<float>', default=0.5, help="The dropout probability. To disable, give a negative number (default=0.5)")
+parser.add_argument("--dropout", dest="dropout_prob", type=float, metavar='<float>', default=0.4, help="The dropout probability. To disable, give a negative number (default=0.4)")
 parser.add_argument("--vocab-path", dest="vocab_path", type=str, metavar='<str>', help="(Optional) The path to the existing vocab file (*.pkl)")
 parser.add_argument("--skip-init-bias", dest="skip_init_bias", action='store_true', help="Skip initialization of the last layer bias")
 parser.add_argument("--emb", dest="emb_path", type=str, metavar='<str>', help="The path to the word embeddings file (Word2Vec format)")
@@ -39,12 +39,15 @@ parser.add_argument("--epochs", dest="epochs", type=int, metavar='<int>', defaul
 parser.add_argument("--maxlen", dest="maxlen", type=int, metavar='<int>', default=0, help="Maximum allowed number of words during training. '0' means no limit (default=0)")
 parser.add_argument("--seed", dest="seed", type=int, metavar='<int>', default=1234, help="Random seed (default=1234)")
 parser.add_argument("--tfidf", dest="tfidf", action='store_true', help="Concatenate tf-idf matrix with model output")
+parser.add_argument("--dense", dest="dense", type=int, metavar='<int>', default=0, help="Add dense layer before final full connected layer")
+parser.add_argument("--bi", dest="bi", action='store_true', help="Use bi-directional RNN")
+parser.add_argument("--plot", dest="plot", action='store_true', help="Save PNG plot")
 args = parser.parse_args()
 
 out_dir = args.out_dir_path
 
 U.mkdir_p(out_dir + '/preds')
-U.set_logger(out_dir)
+timestr = U.set_logger(out_dir)
 U.print_args(args)
 
 assert args.model_type in {'mlp', 'cls', 'clsp', 'reg', 'regp', 'breg', 'bregp'}
@@ -79,7 +82,6 @@ if args.tfidf:
 	dev_pca, _, _ = dataset.get_tfidf(args.dev_path, args.prompt_id, tfidf=TfIdf, pca=Pca, training_material=False)
 	test_pca, _, _ = dataset.get_tfidf(args.test_path, args.prompt_id, tfidf=TfIdf, pca=Pca, training_material=False)
 else:
-	train_pca = None
 	dev_pca = None
 	test_pca = None
 
@@ -89,9 +91,9 @@ if not args.vocab_path:
 		pk.dump(vocab, vocab_file)
 
 # Pad sequences for mini-batch processing
-if args.model_type in {'breg', 'bregp', 'clsp', 'mlp'}:
-	assert args.rnn_dim > 0
-	assert args.recurrent_unit == 'lstm'
+if args.model_type in {'breg', 'bregp', 'clsp', 'cls', 'mlp'}:
+# 	assert args.rnn_dim > 0
+# 	assert args.recurrent_unit == 'lstm'
 	train_x = sequence.pad_sequences(train_x, maxlen=overal_maxlen)
 	dev_x = sequence.pad_sequences(dev_x, maxlen=overal_maxlen)
 	test_x = sequence.pad_sequences(test_x, maxlen=overal_maxlen)
@@ -195,7 +197,7 @@ else:
 	
 model.compile(loss=loss, optimizer=optimizer, metrics=[metric])
 
-logger.info(model.summary())
+model.summary()
 
 ###############################################################################################################################
 ## Plotting model
@@ -203,14 +205,14 @@ logger.info(model.summary())
 
 from keras.utils.visualize_util import plot
 
-plot(model, to_file = out_dir + '/model.png')
+plot(model, to_file = out_dir + '/model_plot' + timestr + '.png')
 
 ###############################################################################################################################
 ## Save model architecture
 #
 
 logger.info('Saving model architecture')
-with open(out_dir + '/model_arch.json', 'w') as arch:
+with open(out_dir + '/model_config'+ timestr + '.json', 'w') as arch:
 	arch.write(model.to_json(indent=2))
 logger.info('  Done')
 	
@@ -218,7 +220,7 @@ logger.info('  Done')
 ## Evaluator
 #
 
-evl = Evaluator(args, out_dir, dev_x, test_x, dev_y, test_y, dev_y_org, test_y_org, use_tfidf=args.tfidf, dev_pca=dev_pca, test_pca=test_pca)
+evl = Evaluator(args, out_dir, dev_x, test_x, dev_y, test_y, dev_y_org, test_y_org, dev_pca=dev_pca, test_pca=test_pca)
 
 ###############################################################################################################################
 ## Training
@@ -230,6 +232,15 @@ evl.evaluate(model, -1, print_info=True)
 
 total_train_time = 0
 total_eval_time = 0
+
+if args.plot:
+	training_epochs = []
+	training_losses = []
+	training_accuracy = []
+	dev_losses = []
+	dev_accuracy = []
+	dev_qwks = []
+	dev_kpas = []
 
 for ii in range(args.epochs):
 	# Training
@@ -243,7 +254,7 @@ for ii in range(args.epochs):
 	
 	# Evaluate
 	t0 = time()
-	evl.evaluate(model, ii)
+	dev_loss, dev_acc, dev_qwk, dev_kpa = evl.evaluate(model, ii)
 	evl_time = time() - t0
 	total_eval_time += evl_time
 	
@@ -253,6 +264,15 @@ for ii in range(args.epochs):
 	logger.info('Epoch %d, train: %is, evaluation: %is' % (ii, tr_time, evl_time))
 	logger.info('[Train] loss: %.4f, metric: %.4f' % (train_loss, train_metric))
 	evl.print_info()
+	
+	if args.plot:
+		training_epochs.append(ii)
+		training_losses.append(train_loss)
+		training_accuracy.append(train_metric)
+		dev_losses.append(dev_loss)
+		dev_accuracy.append(dev_acc)
+		dev_qwks.append(dev_qwk)
+		dev_kpas.append(dev_kpa)
 
 ###############################################################################################################################
 ## Summary of the results
@@ -262,5 +282,26 @@ logger.info('Training:   %i seconds in total' % total_train_time)
 logger.info('Evaluation: %i seconds in total' % total_eval_time)
 
 evl.print_final_info()
+
+if args.plot:
+	import matplotlib.pyplot as plt
+	
+	tloss, = plt.plot(training_epochs, training_losses, 'b', label='Train Loss')
+	tacc, = plt.plot(training_epochs, training_accuracy, 'ro', label='Train Accuracy')
+	dloss, = plt.plot(training_epochs, dev_losses, 'g', label='Dev Loss')
+	dacc, = plt.plot(training_epochs, dev_accuracy, 'yo', label='Dev Accuracy')
+	plt.legend()
+	plt.xlabel('epochs')
+	plt.savefig(out_dir + '/LossAccuracy' + timestr + '.png')
+	# plt.show()
+	plt.close()
+	
+	plt.plot(training_epochs, dev_qwks, 'r', label='Dev QWK')
+	plt.plot(training_epochs, dev_kpas, 'g', label='Dev Kappa')
+	plt.xlabel('epochs')
+	plt.legend()
+	plt.savefig(out_dir + '/QWKappa' + timestr + '.png')
+	# plt.show()
+	plt.close()
 
 

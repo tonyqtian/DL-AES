@@ -21,6 +21,7 @@ def set_logger(out_dir=None):
 		log_file.setLevel(logging.DEBUG)
 		log_file.setFormatter(logging.Formatter(file_format))
 		logger.addHandler(log_file)
+	return timestr
 
 #-----------------------------------------------------------------------------------------------------------#
 
