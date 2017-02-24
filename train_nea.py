@@ -8,6 +8,9 @@ import nea.utils as U
 import pickle as pk
 from keras.utils.np_utils import to_categorical
 
+import matplotlib
+matplotlib.use('Agg')
+
 logger = logging.getLogger(__name__)
 
 ###############################################################################################################################
