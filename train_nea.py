@@ -38,6 +38,7 @@ parser.add_argument("--emb", dest="emb_path", type=str, metavar='<str>', help="T
 parser.add_argument("--epochs", dest="epochs", type=int, metavar='<int>', default=50, help="Number of epochs (default=50)")
 parser.add_argument("--maxlen", dest="maxlen", type=int, metavar='<int>', default=0, help="Maximum allowed number of words during training. '0' means no limit (default=0)")
 parser.add_argument("--seed", dest="seed", type=int, metavar='<int>', default=1234, help="Random seed (default=1234)")
+parser.add_argument("--tfidf", dest="tfidf", action='store_true', help="Concatenate tf-idf matrix with model output")
 args = parser.parse_args()
 
 out_dir = args.out_dir_path
@@ -73,9 +74,14 @@ from keras.preprocessing import sequence
 (train_x, train_y, train_pmt), (dev_x, dev_y, dev_pmt), (test_x, test_y, test_pmt), vocab, vocab_size, overal_maxlen, num_outputs = dataset.get_data(
 	(args.train_path, args.dev_path, args.test_path), args.prompt_id, args.vocab_size, args.maxlen, tokenize_text=True, to_lower=True, sort_by_len=False, vocab_path=args.vocab_path)
 
-train_pca, TfIdf, Pca = dataset.get_tfidf(args.train_path, args.prompt_id, training_material=True)
-dev_pca, _, _ = dataset.get_tfidf(args.dev_path, args.prompt_id, tfidf=TfIdf, pca=Pca, training_material=False)
-test_pca, _, _ = dataset.get_tfidf(args.test_path, args.prompt_id, tfidf=TfIdf, pca=Pca, training_material=False)
+if args.tfidf:
+	train_pca, TfIdf, Pca = dataset.get_tfidf(args.train_path, args.prompt_id, training_material=True)
+	dev_pca, _, _ = dataset.get_tfidf(args.dev_path, args.prompt_id, tfidf=TfIdf, pca=Pca, training_material=False)
+	test_pca, _, _ = dataset.get_tfidf(args.test_path, args.prompt_id, tfidf=TfIdf, pca=Pca, training_material=False)
+else:
+	train_pca = None
+	dev_pca = None
+	test_pca = None
 
 if not args.vocab_path:
 	# Dump vocab
@@ -211,10 +217,8 @@ logger.info('  Done')
 ###############################################################################################################################
 ## Evaluator
 #
-if args.model_type == 'mlp':
-	evl = Evaluator(args, out_dir, dev_x, test_x, dev_y, test_y, dev_y_org, test_y_org, use_tfidf=True, dev_pca=dev_pca, test_pca=test_pca)
-else:
-	evl = Evaluator(args, out_dir, dev_x, test_x, dev_y, test_y, dev_y_org, test_y_org)
+
+evl = Evaluator(args, out_dir, dev_x, test_x, dev_y, test_y, dev_y_org, test_y_org, use_tfidf=args.tfidf, dev_pca=dev_pca, test_pca=test_pca)
 
 ###############################################################################################################################
 ## Training
@@ -230,7 +234,7 @@ total_eval_time = 0
 for ii in range(args.epochs):
 	# Training
 	t0 = time()
-	if args.model_type == 'mlp':
+	if args.tfidf:
 		train_history = model.fit([train_x, train_pca], train_y, batch_size=args.batch_size, nb_epoch=1, verbose=0)
 	else:
 		train_history = model.fit(train_x, train_y, batch_size=args.batch_size, nb_epoch=1, verbose=0)
@@ -258,16 +262,5 @@ logger.info('Training:   %i seconds in total' % total_train_time)
 logger.info('Evaluation: %i seconds in total' % total_eval_time)
 
 evl.print_final_info()
-
-
-
-
-
-
-
-
-
-
-
 
 

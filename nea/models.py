@@ -93,15 +93,20 @@ def create_model(args, initial_mean_value, overal_maxlen, vocab, pca_len=50):
 	elif args.model_type == 'mlp':
 		logger.info('Building a linear model with POOLING')
 		sequence = Input(shape=(overal_maxlen,), dtype='int32')
-		pca_input = Input(shape=(pca_len,), dtype='float32')
+		if args.tfidf:
+			pca_input = Input(shape=(pca_len,), dtype='float32')
 		x = Embedding(args.vocab_size, args.emb_dim, mask_zero=True, init=my_init, trainable=my_trainable)(sequence)
 		x = MeanOverTime(mask_zero=True)(x)
-		z = merge([x,pca_input], mode='concat')
-		z = Dense(32, activation='tanh')(z)
+		if args.tfidf:
+			x = merge([x,pca_input], mode='concat')
+		z = Dense(32, activation='tanh')(x)
 		z = Dropout(args.dropout_prob)(z)
 		predictions = Dense(num_outputs, activation='softmax')(z)
-		model = Model(input=[sequence, pca_input], output=predictions)
-				
+		if args.tfidf:
+			model = Model(input=[sequence, pca_input], output=predictions)
+		else:
+			model = Model(input=sequence, output=predictions)
+			
 	elif args.model_type == 'reg':
 		logger.info('Building a REGRESSION model')
 		model = Sequential()
