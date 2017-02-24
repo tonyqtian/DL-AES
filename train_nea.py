@@ -196,7 +196,7 @@ else:
 	logger.info('  use classification model')
 	loss = 'categorical_crossentropy'
 	metric = 'categorical_accuracy'
-	model = create_model(args, categ, overal_maxlen, vocab)
+	model = create_model(args, categ, overal_maxlen, vocab, pca_len=args.tfidf)
 	
 model.compile(loss=loss, optimizer=optimizer, metrics=[metric])
 
