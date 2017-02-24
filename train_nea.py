@@ -273,7 +273,12 @@ for ii in range(args.epochs):
 		dev_accuracy.append(dev_acc)
 		dev_qwks.append(dev_qwk)
 		dev_kpas.append(dev_kpa)
-
+	
+	if train_metric > 0.9:
+		if dev_acc / train_metric < 0.6:
+			logger.info('Early stop >>> dev/train accuracy rate: %.4f ' % (dev_acc/train_metric ,))
+			break
+		
 ###############################################################################################################################
 ## Summary of the results
 #
