@@ -191,7 +191,7 @@ else:
 	metric = 'categorical_accuracy'
 			
 if "reg" in args.model_type:
-	model = create_model(args, train_y.mean(axis=0), overal_maxlen, vocab)
+	model = create_model(args, train_y.mean(axis=0), overal_maxlen, vocab, pca_len=args.tfidf)
 else:
 	logger.info('  use classification model')
 	loss = 'categorical_crossentropy'

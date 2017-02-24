@@ -304,7 +304,7 @@ def create_vocab(file_path, prompt_id, maxlen, vocab_size, tokenize_text, to_low
 # 				essays_ids.append(int(tokens[0]))
 # 	return essays_list, essays_ids
 
-def get_tfidf(file_path, prompt_id=-1, tfidf_dim=3000, pca_dim=50, tfidf=None, pca=None, training_material=True):
+def get_tfidf(file_path, prompt_id=-1, tfidf_dim=3000, pca_dim, tfidf=None, pca=None, training_material=True):
 	logger.info('<TF/IDF> Reading dataset from: ' + file_path)
 	data_x = []
 	with codecs.open(file_path, mode='r', encoding='UTF8') as input_file:

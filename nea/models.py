@@ -3,7 +3,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-def create_model(args, initial_mean_value, overal_maxlen, vocab, pca_len=50):
+def create_model(args, initial_mean_value, overal_maxlen, vocab, pca_len):
 	
 	import keras.backend as K
 	from keras.layers.embeddings import Embedding
@@ -60,7 +60,7 @@ def create_model(args, initial_mean_value, overal_maxlen, vocab, pca_len=50):
 		logger.info(' Use default initializing embedding')
 	
 	#Prepare TF/IDF input holder	
-	if args.tfidf:
+	if args.tfidf > 0:
 		pca_input = Input(shape=(pca_len,), dtype='float32')
 				
 	if args.model_type == 'cls':
@@ -94,7 +94,7 @@ def create_model(args, initial_mean_value, overal_maxlen, vocab, pca_len=50):
 				merged = merge([forwards, backwards], mode='concat', concat_axis=-1)
 			else:
 				merged = forwards
-			if args.tfidf:
+			if args.tfidf > 0:
 				tfidfmerged = merge([merged,pca_input], mode='concat')
 			else:
 				tfidfmerged = merged
@@ -107,7 +107,7 @@ def create_model(args, initial_mean_value, overal_maxlen, vocab, pca_len=50):
 			if args.dropout_prob > 0:
 				x = Dropout(args.dropout_prob)(x)
 			x = MeanOverTime(mask_zero=True)(x)
-			if args.tfidf:
+			if args.tfidf > 0:
 				z = merge([x,pca_input], mode='concat')
 			else:
 				z = x
@@ -116,7 +116,7 @@ def create_model(args, initial_mean_value, overal_maxlen, vocab, pca_len=50):
 				if args.dropout_prob > 0:
 					z = Dropout(args.dropout_prob)(z)
 			predictions = Dense(num_outputs, activation='softmax')(z)
-		if args.tfidf:
+		if args.tfidf > 0:
 			model = Model(input=[sequence, pca_input], output=predictions)
 		else:
 			model = Model(input=sequence, output=predictions)
@@ -128,7 +128,7 @@ def create_model(args, initial_mean_value, overal_maxlen, vocab, pca_len=50):
 		if args.dropout_prob > 0:
 			x = Dropout(args.dropout_prob)(x)
 		x = MeanOverTime(mask_zero=True)(x)
-		if args.tfidf:
+		if args.tfidf > 0:
 			z = merge([x,pca_input], mode='concat')
 		else:
 			z = x
@@ -137,7 +137,7 @@ def create_model(args, initial_mean_value, overal_maxlen, vocab, pca_len=50):
 			if args.dropout_prob > 0:
 				z = Dropout(args.dropout_prob)(z)
 		predictions = Dense(num_outputs, activation='softmax')(z)
-		if args.tfidf:
+		if args.tfidf > 0:
 			model = Model(input=[sequence, pca_input], output=predictions)
 		else:
 			model = Model(input=sequence, output=predictions)
