@@ -46,6 +46,7 @@ parser.add_argument("--dense", dest="dense", type=int, metavar='<int>', default=
 parser.add_argument("--learning-rate", dest="learning_rate", type=float, metavar='<int>', default=0.0, help="Optimizer learning rate")
 parser.add_argument("--bi", dest="bi", action='store_true', help="Use bi-directional RNN")
 parser.add_argument("--plot", dest="plot", action='store_true', help="Save PNG plot")
+parser.add_argument("--embedding-trainable", dest="embd_train", action='store_true', help="Set embedding layer trainable")
 args = parser.parse_args()
 
 out_dir = args.out_dir_path
@@ -62,8 +63,8 @@ assert args.aggregation in {'mot', 'attsum', 'attmean'}
 
 if args.seed > 0:
 	np.random.seed(args.seed)
-else:
-	np.random.seed()
+# else:
+# 	np.random.seed()
 
 if args.prompt_id:
 	from nea.asap_evaluator import Evaluator
