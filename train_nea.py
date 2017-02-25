@@ -47,6 +47,8 @@ parser.add_argument("--learning-rate", dest="learning_rate", type=float, metavar
 parser.add_argument("--bi", dest="bi", action='store_true', help="Use bi-directional RNN")
 parser.add_argument("--plot", dest="plot", action='store_true', help="Save PNG plot")
 parser.add_argument("--embedding-trainable", dest="embd_train", action='store_true', help="Set embedding layer trainable")
+parser.add_argument("--2layer-rnn", dest="rnn_2l", action='store_true', help="Set 2 layer RNN")
+parser.add_argument("--3layer-rnn", dest="rnn_3l", action='store_true', help="Set 3 layer RNN")
 args = parser.parse_args()
 
 out_dir = args.out_dir_path

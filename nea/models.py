@@ -78,8 +78,10 @@ def create_model(args, initial_mean_value, overal_maxlen, vocab, pca_len):
 		logger.info('Building a CLASSIFICATION model with POOLING')
 		sequence = Input(shape=(overal_maxlen,), dtype='int32')
 		x = Embedding(len(vocab), args.emb_dim, mask_zero=True, init=my_init, trainable=args.embd_train)(sequence)
+		# Conv Layer
 		if args.cnn_dim > 0:
 			x = Conv1DWithMasking(nb_filter=args.cnn_dim, filter_length=args.cnn_window_size, border_mode=cnn_border_mode, subsample_length=1)(x)
+		# RNN Layer
 		if args.rnn_dim > 0:
 			forwards = RNN(args.rnn_dim, return_sequences=True, dropout_W=dropout_W, dropout_U=dropout_U)(x)
 			if args.bi:
@@ -88,34 +90,70 @@ def create_model(args, initial_mean_value, overal_maxlen, vocab, pca_len):
 				forwards = Dropout(args.dropout_prob)(forwards)
 				if args.bi:
 					backwards = Dropout(args.dropout_prob)(backwards)
+			# Stack 2 Layers
+			if args.rnn_2l or args.rnn_3l:
+				if args.bi:
+					merged = merge([forwards, backwards], mode='concat', concat_axis=-1)
+				else:
+					merged = forwards
+				forwards = RNN(args.rnn_dim, return_sequences=True, dropout_W=dropout_W, dropout_U=dropout_U)(merged)
+				if args.bi:
+					backwards = RNN(args.rnn_dim, return_sequences=True, dropout_W=dropout_W, dropout_U=dropout_U, go_backwards=True)(merged)
+				if args.dropout_prob > 0:
+					forwards = Dropout(args.dropout_prob)(forwards)
+					if args.bi:
+						backwards = Dropout(args.dropout_prob)(backwards)
+				# Stack 3 Layers
+				if args.rnn_3l:
+					if args.bi:
+						merged = merge([forwards, backwards], mode='concat', concat_axis=-1)
+					else:
+						merged = forwards
+					forwards = RNN(args.rnn_dim, return_sequences=True, dropout_W=dropout_W, dropout_U=dropout_U)(merged)
+					if args.bi:
+						backwards = RNN(args.rnn_dim, return_sequences=True, dropout_W=dropout_W, dropout_U=dropout_U, go_backwards=True)(merged)
+					if args.dropout_prob > 0:
+						forwards = Dropout(args.dropout_prob)(forwards)
+						if args.bi:
+							backwards = Dropout(args.dropout_prob)(backwards)
+
+			# Mean over Time	
 			forwards = MeanOverTime(mask_zero=True)(forwards)
 			if args.bi:
 				backwards = MeanOverTime(mask_zero=True)(backwards)
 				merged = merge([forwards, backwards], mode='concat', concat_axis=-1)
 			else:
 				merged = forwards
+			# Augmented TF/IDF Layer	
 			if args.tfidf > 0:
 				tfidfmerged = merge([merged,pca_input], mode='concat')
 			else:
 				tfidfmerged = merged
+			# Optional Dense Layer	
 			if args.dense > 0:
 				tfidfmerged = Dense(args.dense, activation='tanh')(tfidfmerged)
 				if args.dropout_prob > 0:
 					tfidfmerged = Dropout(args.dropout_prob)(tfidfmerged)
+			# Final Prediction Layer
 			predictions = Dense(num_outputs, activation='softmax')(tfidfmerged)
-		else: #if no rnn
+		else: # if no rnn
 			if args.dropout_prob > 0:
 				x = Dropout(args.dropout_prob)(x)
+			# Mean over Time
 			x = MeanOverTime(mask_zero=True)(x)
+			# Augmented TF/IDF Layer
 			if args.tfidf > 0:
 				z = merge([x,pca_input], mode='concat')
 			else:
 				z = x
+			# Optional Dense Layer
 			if args.dense > 0:
 				z = Dense(args.dense, activation='tanh')(z)
 				if args.dropout_prob > 0:
 					z = Dropout(args.dropout_prob)(z)
+			# Final Prediction Layer
 			predictions = Dense(num_outputs, activation='softmax')(z)
+		# Model Input/Output	
 		if args.tfidf > 0:
 			model = Model(input=[sequence, pca_input], output=predictions)
 		else:
