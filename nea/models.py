@@ -40,7 +40,7 @@ def create_model(args, initial_mean_value, overal_maxlen, vocab, pca_len):
 	###############################################################################################################################
 	## Initialize embeddings if requested
 	#
-	my_trainable = True
+		
 	if args.emb_path:
 		def my_init(shape, name=None):
 			from nea.w2vEmbReader import W2VEmbReader as EmbReader
@@ -66,7 +66,7 @@ def create_model(args, initial_mean_value, overal_maxlen, vocab, pca_len):
 	if args.model_type == 'cls':
 		logger.info('Building a CLASSIFICATION model')
 		sequence = Input(shape=(overal_maxlen,), dtype='int32')
-		x = Embedding(args.vocab_size, args.emb_dim, mask_zero=True, init=my_init, trainable=my_trainable)(sequence)
+		x = Embedding(len(vocab), args.emb_dim, mask_zero=True, init=my_init, trainable=args.embd_train)(sequence)
 		if args.cnn_dim > 0:
 			x = Conv1DWithMasking(nb_filter=args.cnn_dim, filter_length=args.cnn_window_size, border_mode=cnn_border_mode, subsample_length=1)(x)
 		if args.rnn_dim > 0:
@@ -77,7 +77,7 @@ def create_model(args, initial_mean_value, overal_maxlen, vocab, pca_len):
 	elif args.model_type == 'clsp':
 		logger.info('Building a CLASSIFICATION model with POOLING')
 		sequence = Input(shape=(overal_maxlen,), dtype='int32')
-		x = Embedding(args.vocab_size, args.emb_dim, mask_zero=True, init=my_init, trainable=my_trainable)(sequence)
+		x = Embedding(len(vocab), args.emb_dim, mask_zero=True, init=my_init, trainable=args.embd_train)(sequence)
 		if args.cnn_dim > 0:
 			x = Conv1DWithMasking(nb_filter=args.cnn_dim, filter_length=args.cnn_window_size, border_mode=cnn_border_mode, subsample_length=1)(x)
 		if args.rnn_dim > 0:
@@ -124,7 +124,7 @@ def create_model(args, initial_mean_value, overal_maxlen, vocab, pca_len):
 	elif args.model_type == 'mlp':
 		logger.info('Building a linear model with POOLING')
 		sequence = Input(shape=(overal_maxlen,), dtype='int32')
-		x = Embedding(args.vocab_size, args.emb_dim, mask_zero=True, init=my_init, trainable=my_trainable)(sequence)
+		x = Embedding(len(vocab), args.emb_dim, mask_zero=True, init=my_init, trainable=args.embd_train)(sequence)
 		if args.dropout_prob > 0:
 			x = Dropout(args.dropout_prob)(x)
 		x = MeanOverTime(mask_zero=True)(x)
@@ -145,7 +145,7 @@ def create_model(args, initial_mean_value, overal_maxlen, vocab, pca_len):
 	elif args.model_type == 'reg':
 		logger.info('Building a REGRESSION model')
 		model = Sequential()
-		model.add(Embedding(args.vocab_size, args.emb_dim, mask_zero=True, init=my_init, trainable=my_trainable))
+		model.add(Embedding(len(vocab), args.emb_dim, mask_zero=True, init=my_init, trainable=args.embd_train))
 		if args.cnn_dim > 0:
 			model.add(Conv1DWithMasking(nb_filter=args.cnn_dim, filter_length=args.cnn_window_size, border_mode=cnn_border_mode, subsample_length=1))
 		if args.rnn_dim > 0:
@@ -161,7 +161,7 @@ def create_model(args, initial_mean_value, overal_maxlen, vocab, pca_len):
 	elif args.model_type == 'regp':
 		logger.info('Building a REGRESSION model with POOLING')
 		model = Sequential()
-		model.add(Embedding(args.vocab_size, args.emb_dim, mask_zero=True, init=my_init, trainable=my_trainable))
+		model.add(Embedding(len(vocab), args.emb_dim, mask_zero=True, init=my_init, trainable=args.embd_train))
 		if args.cnn_dim > 0:
 			model.add(Conv1DWithMasking(nb_filter=args.cnn_dim, filter_length=args.cnn_window_size, border_mode=cnn_border_mode, subsample_length=1))
 		if args.rnn_dim > 0:
@@ -182,7 +182,7 @@ def create_model(args, initial_mean_value, overal_maxlen, vocab, pca_len):
 	elif args.model_type == 'breg':
 		logger.info('Building a BIDIRECTIONAL REGRESSION model')
 		sequence = Input(shape=(overal_maxlen,), dtype='int32')
-		output = Embedding(args.vocab_size, args.emb_dim, mask_zero=True, init=my_init, trainable=my_trainable)(sequence)
+		output = Embedding(len(vocab), args.emb_dim, mask_zero=True, init=my_init, trainable=args.embd_train)(sequence)
 		if args.cnn_dim > 0:
 			output = Conv1DWithMasking(nb_filter=args.cnn_dim, filter_length=args.cnn_window_size, border_mode=cnn_border_mode, subsample_length=1)(output)
 		if args.rnn_dim > 0:
@@ -201,7 +201,7 @@ def create_model(args, initial_mean_value, overal_maxlen, vocab, pca_len):
 	elif args.model_type == 'bregp':
 		logger.info('Building a BIDIRECTIONAL REGRESSION model with POOLING')
 		sequence = Input(shape=(overal_maxlen,), dtype='int32')
-		output = Embedding(args.vocab_size, args.emb_dim, mask_zero=True, init=my_init, trainable=my_trainable)(sequence)
+		output = Embedding(len(vocab), args.emb_dim, mask_zero=True, init=my_init, trainable=args.embd_train)(sequence)
 		if args.cnn_dim > 0:
 			output = Conv1DWithMasking(nb_filter=args.cnn_dim, filter_length=args.cnn_window_size, border_mode=cnn_border_mode, subsample_length=1)(output)
 		if args.rnn_dim > 0:
