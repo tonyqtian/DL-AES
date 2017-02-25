@@ -2,8 +2,8 @@ from scipy.stats import pearsonr, spearmanr, kendalltau
 import logging
 import numpy as np
 from nea.my_kappa_calculator import quadratic_weighted_kappa as qwk
-# from nea.my_kappa_calculator import linear_weighted_kappa as lwk
-from nea.my_kappa_calculator import cohen_kappa as lwk
+from nea.my_kappa_calculator import linear_weighted_kappa as lwk
+# from nea.my_kappa_calculator import cohen_kappa as lwk
 import nea.asap_reader as dataset
 
 logger = logging.getLogger(__name__)
@@ -106,10 +106,10 @@ class Evaluator():
 			self.dev_loss, self.dev_metric, self.dev_pred.mean(), self.dev_mean, self.dev_pred.std(), self.dev_std))
 		logger.info('[Test]  loss: %.4f, metric: %.4f, mean: %.3f (%.3f), stdev: %.3f (%.3f)' % (
 			self.test_loss, self.test_metric, self.test_pred.mean(), self.test_mean, self.test_pred.std(), self.test_std))
-		logger.info('[DEV]   QWK:  %.3f, Kappa: %.3f, PRS: %.3f, SPR: %.3f, Tau: %.3f (Best @ %i: {{%.3f}}, %.3f, %.3f, %.3f, %.3f)' % (
+		logger.info('[DEV]   QWK:  %.3f, LWK: %.3f, PRS: %.3f, SPR: %.3f, Tau: %.3f (Best @ %i: {{%.3f}}, %.3f, %.3f, %.3f, %.3f)' % (
 			self.dev_qwk, self.dev_lwk, self.dev_prs, self.dev_spr, self.dev_tau, self.best_dev_epoch,
 			self.best_dev[0], self.best_dev[1], self.best_dev[2], self.best_dev[3], self.best_dev[4]))
-		logger.info('[TEST]  QWK:  %.3f, Kappa: %.3f, PRS: %.3f, SPR: %.3f, Tau: %.3f (Best @ %i: {{%.3f}}, %.3f, %.3f, %.3f, %.3f)' % (
+		logger.info('[TEST]  QWK:  %.3f, LWK: %.3f, PRS: %.3f, SPR: %.3f, Tau: %.3f (Best @ %i: {{%.3f}}, %.3f, %.3f, %.3f, %.3f)' % (
 			self.test_qwk, self.test_lwk, self.test_prs, self.test_spr, self.test_tau, self.best_dev_epoch,
 			self.best_test[0], self.best_test[1], self.best_test[2], self.best_test[3], self.best_test[4]))
 		
@@ -120,5 +120,5 @@ class Evaluator():
 		logger.info('Missed @ Epoch %i:' % self.best_test_missed_epoch)
 		logger.info('  [TEST] QWK: %.3f' % self.best_test_missed)
 		logger.info('Best @ Epoch %i:' % self.best_dev_epoch)
-		logger.info('  [DEV]  QWK: %.3f, Kappa: %.3f, PRS: %.3f, SPR: %.3f, Tau: %.3f' % (self.best_dev[0], self.best_dev[1], self.best_dev[2], self.best_dev[3], self.best_dev[4]))
-		logger.info('  [TEST] QWK: %.3f, Kappa: %.3f, PRS: %.3f, SPR: %.3f, Tau: %.3f' % (self.best_test[0], self.best_test[1], self.best_test[2], self.best_test[3], self.best_test[4]))
+		logger.info('  [DEV]  QWK: %.3f, LWK: %.3f, PRS: %.3f, SPR: %.3f, Tau: %.3f' % (self.best_dev[0], self.best_dev[1], self.best_dev[2], self.best_dev[3], self.best_dev[4]))
+		logger.info('  [TEST] QWK: %.3f, LWK: %.3f, PRS: %.3f, SPR: %.3f, Tau: %.3f' % (self.best_test[0], self.best_test[1], self.best_test[2], self.best_test[3], self.best_test[4]))
