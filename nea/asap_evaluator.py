@@ -99,7 +99,7 @@ class Evaluator():
 		
 		if print_info:
 			self.print_info()
-		return (self.dev_loss, self.dev_metric, self.dev_qwk, self.dev_lwk)
+		return (self.dev_loss, self.dev_metric, self.dev_qwk, self.test_qwk)
 	
 	def print_info(self):
 		logger.info('[Dev]   loss: %.4f, metric: %.4f, mean: %.3f (%.3f), stdev: %.3f (%.3f)' % (

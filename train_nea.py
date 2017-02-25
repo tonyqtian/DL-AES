@@ -247,7 +247,7 @@ if args.plot:
 	dev_losses = []
 	dev_accuracy = []
 	dev_qwks = []
-	dev_kpas = []
+	test_qwks = []
 
 for ii in range(args.epochs):
 	# Training
@@ -261,7 +261,7 @@ for ii in range(args.epochs):
 	
 	# Evaluate
 	t0 = time()
-	dev_loss, dev_acc, dev_qwk, dev_kpa = evl.evaluate(model, ii)
+	dev_loss, dev_acc, dev_qwk, test_qwk = evl.evaluate(model, ii)
 	evl_time = time() - t0
 	total_eval_time += evl_time
 	
@@ -279,7 +279,7 @@ for ii in range(args.epochs):
 		dev_losses.append(dev_loss)
 		dev_accuracy.append(dev_acc)
 		dev_qwks.append(dev_qwk)
-		dev_kpas.append(dev_kpa)
+		test_qwks.append(test_qwk)
 	
 	if dev_loss / train_loss > 3.4 :
 		logger.info('Early stop >>> dev/train loss rate: %0.2f ' % (dev_loss/train_loss,))
@@ -297,21 +297,23 @@ evl.print_final_info()
 if args.plot:
 	import matplotlib.pyplot as plt
 	
-	tloss, = plt.plot(training_epochs, training_losses, 'b', label='Train Loss')
-	tacc, = plt.plot(training_epochs, training_accuracy, 'ro', label='Train Accuracy')
-	dloss, = plt.plot(training_epochs, dev_losses, 'g', label='Dev Loss')
-	dacc, = plt.plot(training_epochs, dev_accuracy, 'yo', label='Dev Accuracy')
+	plt.plot(training_epochs, training_losses, 'b', label='Train Loss')
+	plt.plot(training_epochs, training_accuracy, 'ro', label='Train Accuracy')
+	plt.plot(training_epochs, dev_losses, 'g', label='Dev Loss')
+	plt.plot(training_epochs, dev_accuracy, 'yo', label='Dev Accuracy')
 	plt.legend()
 	plt.xlabel('epochs')
 	plt.savefig(out_dir + '/LossAccuracy' + timestr + '.png')
 	# plt.show()
 	plt.close()
 	
+	plt.plot(training_epochs, training_accuracy, 'ro', label='Train Accuracy')
+	plt.plot(training_epochs, dev_accuracy, 'yo', label='Dev Accuracy')
 	plt.plot(training_epochs, dev_qwks, 'r', label='Dev QWK')
-	plt.plot(training_epochs, dev_kpas, 'g', label='Dev Kappa')
+	plt.plot(training_epochs, test_qwks, 'g', label='Test QWK')
 	plt.xlabel('epochs')
 	plt.legend()
-	plt.savefig(out_dir + '/QWKappa' + timestr + '.png')
+	plt.savefig(out_dir + '/QWK' + timestr + '.png')
 	# plt.show()
 	plt.close()
 
