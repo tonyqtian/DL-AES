@@ -213,14 +213,14 @@ model.summary()
 
 from keras.utils.visualize_util import plot
 
-plot(model, to_file = out_dir + '/model_plot' + timestr + '.png')
+plot(model, to_file = out_dir + '/' + timestr + 'model_plot.png')
 
 ###############################################################################################################################
 ## Save model architecture
 #
 
 logger.info('Saving model architecture')
-with open(out_dir + '/model_config'+ timestr + '.json', 'w') as arch:
+with open(out_dir + '/'+ timestr + 'model_config.json', 'w') as arch:
 	arch.write(model.to_json(indent=2))
 logger.info('  Done')
 	
@@ -304,7 +304,7 @@ if args.plot:
 	plt.plot(training_epochs, dev_accuracy, 'yo', label='Dev Accuracy')
 	plt.legend()
 	plt.xlabel('epochs')
-	plt.savefig(out_dir + '/LossAccuracy' + timestr + '.png')
+	plt.savefig(out_dir + '/' + timestr + 'LossAccuracy.png')
 	# plt.show()
 	plt.close()
 	
@@ -314,7 +314,7 @@ if args.plot:
 	plt.plot(training_epochs, test_qwks, 'g', label='Test QWK')
 	plt.xlabel('epochs')
 	plt.legend()
-	plt.savefig(out_dir + '/QWK' + timestr + '.png')
+	plt.savefig(out_dir + '/' + timestr + 'QWK.png')
 	# plt.show()
 	plt.close()
 
