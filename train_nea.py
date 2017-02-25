@@ -308,7 +308,7 @@ if args.plot:
 	# plt.show()
 	plt.close()
 	
-	plt.plot(training_epochs, training_accuracy, 'ro', label='Train Accuracy')
+	plt.plot(training_epochs, training_accuracy, 'bo', label='Train Accuracy')
 	plt.plot(training_epochs, dev_accuracy, 'yo', label='Dev Accuracy')
 	plt.plot(training_epochs, dev_qwks, 'r', label='Dev QWK')
 	plt.plot(training_epochs, test_qwks, 'g', label='Test QWK')
