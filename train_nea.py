@@ -281,7 +281,7 @@ for ii in range(args.epochs):
 		dev_qwks.append(dev_qwk)
 		dev_kpas.append(dev_kpa)
 	
-	if dev_loss / train_loss > 5.0 :
+	if dev_loss / train_loss > 3.4 :
 		logger.info('Early stop >>> dev/train loss rate: %0.2f ' % (dev_loss/train_loss,))
 		break
 		
