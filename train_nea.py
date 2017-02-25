@@ -3,6 +3,7 @@ import logging
 import numpy as np
 # import scipy
 from time import time
+from time import sleep
 # import sys
 import nea.utils as U
 import pickle as pk
@@ -317,4 +318,14 @@ if args.plot:
 	# plt.show()
 	plt.close()
 
-
+print('\a')
+sleep(1)
+print('\a')
+sleep(0.1)
+print('\a')
+sleep(1)
+print('\a')
+sleep(0.1)
+print('\a')
+sleep(0.1)
+print('\a')
