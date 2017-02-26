@@ -3,11 +3,17 @@ Created on Feb 26, 2017
 
 @author: tonyq
 '''
+import argparse
+from time import sleep
 
 from bayes_opt import BayesianOptimization
 from train_opt_helper import train_opt
 
 if __name__ == '__main__':
+	parser = argparse.ArgumentParser()
+	parser.add_argument("--iter", dest="iter", type=int, metavar='<int>', default=50, help="Iterations")
+	args = parser.parse_args()
+
 	gp_params = {"alpha": 1e5}
 	
 # 	print(train_opt(3, 2, 0.1))
@@ -23,7 +29,7 @@ if __name__ == '__main__':
 											 'bi_rmm': (0, 1),
 											 'rnn_layers': (0, 4),
 											 'embd_train': (0, 1),
- 											 'embd_dim': (0, 4),
+ 											 'embd_dim': (0, 2.99),
 											 'tfidf': (0, 1),
 # 											 'lr': (0.0001, 1),
 											 'dropout': (0.01, 0.99)})
@@ -40,9 +46,27 @@ if __name__ == '__main__':
 				   'dropout':    [0.2, 0.4, 0.4, 0.5, 0.4, 0.4]})
 	
 # 	svcBO.maximize(n_iter=10, acq='ucb', kappa=10, **gp_params)
-	svcBO.maximize(n_iter=1, acq="poi", xi=0.1, **gp_params)
+	svcBO.maximize(n_iter=args.iter, acq="poi", xi=0.1, **gp_params)
 	
 	print('-'*53)
 	print('Final Results')
 	print('SVC: %f' % svcBO.res['max']['max_val'])
 	print('Params: ', svcBO.res['max']['max_params'])
+	
+	print('\a')
+	sleep(0.3)
+	print('\a')
+	sleep(0.3)
+	print('\a')
+	sleep(1)
+	print('\a')
+	sleep(0.3)
+	print('\a')
+	sleep(0.3)
+	print('\a')
+	sleep(1)
+	print('\a')
+	sleep(0.3)
+	print('\a')
+	sleep(0.3)
+	print('\a')
