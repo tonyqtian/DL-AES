@@ -87,7 +87,7 @@ def train_opt(convkernel=0, convwin=2, rnn_dim=0, bi_rmm=0, rnn_layers=0, embd_t
 	
 	args.batch_size = 374
 	args.plot = True
-	args.epochs = 80
+	args.epochs = 50
 	
 	from train_main import train
 	return train(args)
