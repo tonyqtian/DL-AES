@@ -43,8 +43,7 @@ def train_opt(convkernel=0, convwin=2, rnn_dim=0, bi_rmm=0, rnn_layers=0, embd_t
 	parser.add_argument("--2layer-rnn", dest="rnn_2l", action='store_true', help="Set 2 layer RNN")
 	parser.add_argument("--3layer-rnn", dest="rnn_3l", action='store_true', help="Set 3 layer RNN")
 	parser.add_argument("--onscreen", dest="onscreen", action='store_true', help="Show log on stdout")
-	parser.add_argument("--iter", dest="iter", type=int, metavar='<int>', default=10, help="Iterations")
-	args = parser.parse_args()
+	args, _ = parser.parse_known_args()
 	
 	args.cnn_dim = int(round(convkernel))
 	args.cnn_window_size = int(round(convwin))
@@ -86,8 +85,8 @@ def train_opt(convkernel=0, convwin=2, rnn_dim=0, bi_rmm=0, rnn_layers=0, embd_t
 	args.learning_rate = lr
 	args.dropout_prob = dropout
 	
-	args.plot = False
-	args.epochs = 1
+	args.plot = True
+	args.epochs = 80
 	
 	from train_main import train
 	return train(args)
