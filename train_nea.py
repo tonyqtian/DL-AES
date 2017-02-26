@@ -66,8 +66,6 @@ assert args.aggregation in {'mot', 'attsum', 'attmean'}
 
 if args.seed > 0:
 	np.random.seed(args.seed)
-# else:
-# 	np.random.seed()
 
 if args.prompt_id:
 	from nea.asap_evaluator import Evaluator

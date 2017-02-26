@@ -5,15 +5,16 @@ import time
 
 #-----------------------------------------------------------------------------------------------------------#
 
-def set_logger(out_dir=None):
-	console_format = BColors.OKBLUE + '[%(levelname)s]' + BColors.ENDC + ' (%(name)s) %(message)s'
-	#datefmt='%Y-%m-%d %Hh-%Mm-%Ss'
+def set_logger(onscreen=True, out_dir=None):
 	logger = logging.getLogger()
-	logger.setLevel(logging.DEBUG)
-	console = logging.StreamHandler()
-	console.setLevel(logging.DEBUG)
-	console.setFormatter(logging.Formatter(console_format))
-	logger.addHandler(console)
+	if onscreen:
+		console_format = BColors.OKBLUE + '[%(levelname)s]' + BColors.ENDC + ' (%(name)s) %(message)s'
+		#datefmt='%Y-%m-%d %Hh-%Mm-%Ss'
+		logger.setLevel(logging.DEBUG)
+		console = logging.StreamHandler()
+		console.setLevel(logging.DEBUG)
+		console.setFormatter(logging.Formatter(console_format))
+		logger.addHandler(console)
 	if out_dir:
 		timestr = time.strftime("%Y%m%d-%H%M%S-")
 		file_format = '[%(levelname)s] (%(name)s) %(message)s'
