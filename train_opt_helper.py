@@ -43,6 +43,7 @@ def train_opt(convkernel=0, convwin=2, rnn_dim=0, bi_rmm=0, rnn_layers=0, embd_t
 	parser.add_argument("--2layer-rnn", dest="rnn_2l", action='store_true', help="Set 2 layer RNN")
 	parser.add_argument("--3layer-rnn", dest="rnn_3l", action='store_true', help="Set 3 layer RNN")
 	parser.add_argument("--onscreen", dest="onscreen", action='store_true', help="Show log on stdout")
+	parser.add_argument("--iter", dest="iter", type=int, metavar='<int>', default=10, help="Iterations")
 	args = parser.parse_args()
 	
 	args.cnn_dim = int(round(convkernel))
