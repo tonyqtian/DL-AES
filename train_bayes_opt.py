@@ -10,7 +10,7 @@ from bayes_opt import BayesianOptimization
 from train_opt_helper import train_opt
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--iter", dest="iter", type=int, metavar='<int>', default=10, help="Iterations")
+parser.add_argument("--opt-iter", dest="iter", type=int, metavar='<int>', default=10, help="Iterations")
 args1 = parser.parse_args()
 
 gp_params = {"alpha": 1e5}
