@@ -26,7 +26,7 @@ svcBO = BayesianOptimization(train_opt, {
 # 											 'convwin': (2, 5),
 										 'rnn_dim': (0, 128),
 										 'bi_rmm': (0, 1),
-										 'rnn_layers': (0, 4),
+										 'rnn_layers': (0, 3),
 										 'embd_train': (0, 1),
 											 'embd_dim': (0, 4),
 										 'tfidf': (0, 1),
