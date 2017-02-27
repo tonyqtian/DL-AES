@@ -239,9 +239,10 @@ def train(args):
 			dev_qwks.append(dev_qwk)
 			test_qwks.append(test_qwk)
 		
-		if dev_loss / train_loss > 2.4 :
-			logger.info('Early stop >>> dev/train loss rate: %0.2f ' % (dev_loss/train_loss,))
-			break
+		if args.earlystop > 0:
+			if dev_loss / train_loss > args.earlystop:
+				logger.info('Early stop >>> dev/train loss rate: %0.2f ' % (dev_loss/train_loss,))
+				break
 			
 	###############################################################################################################################
 	## Summary of the results
@@ -254,9 +255,9 @@ def train(args):
 		import matplotlib.pyplot as plt
 		
 		plt.plot(training_epochs, training_losses, 'b', label='Train Loss')
-		plt.plot(training_epochs, training_accuracy, 'ro', label='Train Accuracy')
+		plt.plot(training_epochs, training_accuracy, 'r.', label='Train Accuracy')
 		plt.plot(training_epochs, dev_losses, 'g', label='Dev Loss')
-		plt.plot(training_epochs, dev_accuracy, 'yo', label='Dev Accuracy')
+		plt.plot(training_epochs, dev_accuracy, 'y.', label='Dev Accuracy')
 		plt.legend()
 		plt.xlabel('epochs')
 		plt.savefig(out_dir + '/' + timestr + 'LossAccuracy.png')

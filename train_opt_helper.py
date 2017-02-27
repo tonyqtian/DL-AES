@@ -45,9 +45,10 @@ def train_opt(convkernel=0, rnn_dim=0, dropout=0.4, dropout_w=0.4, dropout_u=0.4
 	parser.add_argument("--2layer-rnn", dest="rnn_2l", action='store_true', help="Set 2 layer RNN")
 	parser.add_argument("--3layer-rnn", dest="rnn_3l", action='store_true', help="Set 3 layer RNN")
 	parser.add_argument("--onscreen", dest="onscreen", action='store_true', help="Show log on stdout")
+	parser.add_argument("--earlystop", dest="earlystop", type=float, metavar='<float>', default=0.0, help="Use early stop")
 	args, _ = parser.parse_known_args()
 
-	args.cnn_window_size = 2	
+	args.cnn_window_size = 2
 	args.cnn_dim = int(round(convkernel))
 	args.rnn_dim = int(round(rnn_dim))
 	args.dropout_prob = dropout
@@ -62,7 +63,7 @@ def train_opt(convkernel=0, rnn_dim=0, dropout=0.4, dropout_w=0.4, dropout_u=0.4
 	args.emb_path = 'data/glove.6B.100d.simple.txt'
 	args.emb_dim = 100
 	args.tfidf = 0
-									
+
 	args.learning_rate = 0.004
 	args.batch_size = 374
 	args.plot = True

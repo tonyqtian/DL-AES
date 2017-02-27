@@ -45,6 +45,7 @@ parser.add_argument("--embedding-trainable", dest="embd_train", action='store_tr
 parser.add_argument("--2layer-rnn", dest="rnn_2l", action='store_true', help="Set 2 layer RNN")
 parser.add_argument("--3layer-rnn", dest="rnn_3l", action='store_true', help="Set 3 layer RNN")
 parser.add_argument("--onscreen", dest="onscreen", action='store_true', help="Show log on stdout")
+parser.add_argument("--earlystop", dest="earlystop", type=float, metavar='<float>', default=0.0, help="Use early stop")
 args = parser.parse_args()
 
 from train_main import train
