@@ -137,34 +137,30 @@ def train(args):
 	## Optimizaer algorithm
 	#
 	
-	from nea.optimizers import get_optimizer
-	
+	from nea.optimizers import get_optimizer	
 	optimizer = get_optimizer(args)
 	
 	###############################################################################################################################
 	## Building model
 	#
-	
-	from nea.models import create_model
-	
-	if args.loss == 'mse':
-		loss = 'mean_squared_error'
-		metric = 'mean_absolute_error'
-	elif args.loss == 'mae':
-		loss = 'mean_absolute_error'
-		metric = 'mean_squared_error'
-	else:
-		loss = 'categorical_crossentropy'
-		metric = 'categorical_accuracy'
 				
 	if "reg" in args.model_type:
-		model = create_model(args, train_y.mean(axis=0), overal_maxlen, vocab, pca_len=args.tfidf)
+		logger.info('  use regression model')
+		final_categ = train_y.mean(axis=0)
+		if args.loss == 'mae':
+			loss = 'mean_absolute_error'
+			metric = 'mean_squared_error'
+		else:
+			loss = 'mean_squared_error'
+			metric = 'mean_absolute_error'
 	else:
 		logger.info('  use classification model')
+		final_categ = categ
 		loss = 'categorical_crossentropy'
 		metric = 'categorical_accuracy'
-		model = create_model(args, categ, overal_maxlen, vocab, pca_len=args.tfidf)
-		
+
+	from nea.models import create_model		
+	model = create_model(args, final_categ, overal_maxlen, vocab)
 	model.compile(loss=loss, optimizer=optimizer, metrics=[metric])
 	
 	if args.onscreen: model.summary()
@@ -173,8 +169,7 @@ def train(args):
 	## Plotting model
 	#
 	
-	from keras.utils.visualize_util import plot
-	
+	from keras.utils.visualize_util import plot	
 	plot(model, to_file = out_dir + '/' + timestr + 'model_plot.png')
 	
 	###############################################################################################################################
@@ -187,7 +182,7 @@ def train(args):
 	logger.info('  Done')
 		
 	###############################################################################################################################
-	## Evaluator
+	## Initialize Evaluator
 	#
 	
 	evl = Evaluator(args, out_dir, dev_x, test_x, dev_y, test_y, dev_y_org, test_y_org, dev_pca=dev_pca, test_pca=test_pca)

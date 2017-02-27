@@ -3,7 +3,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-def create_model(args, initial_mean_value, overal_maxlen, vocab, pca_len):
+def create_model(args, initial_mean_value, overal_maxlen, vocab):
 	
 	import keras.backend as K
 	from keras.layers.embeddings import Embedding
@@ -134,7 +134,7 @@ def create_model(args, initial_mean_value, overal_maxlen, vocab, pca_len):
 		
 		# Augmented TF/IDF Layer	
 		if args.tfidf > 0:
-			pca_input = Input(shape=(pca_len,), dtype='float32')
+			pca_input = Input(shape=(args.tfidf,), dtype='float32')
 			tfidfmerged = merge([merged,pca_input], mode='concat')
 		else:
 			tfidfmerged = merged
@@ -163,7 +163,7 @@ def create_model(args, initial_mean_value, overal_maxlen, vocab, pca_len):
 			raise NotImplementedError
 		# Augmented TF/IDF Layer
 		if args.tfidf > 0:
-			pca_input = Input(shape=(pca_len,), dtype='float32')
+			pca_input = Input(shape=(args.tfidf,), dtype='float32')
 			z = merge([x,pca_input], mode='concat')
 		else:
 			z = x
