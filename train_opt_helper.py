@@ -4,7 +4,7 @@ Created on Feb 26, 2017
 @author: tonyq
 '''
 
-def train_opt(convkernel=0, convwin=2, rnn_dim=0, bi_rmm=0, rnn_layers=0, embd_train=0, embd_dim=0, tfidf=0, lr=0.003, dropout=0.4):
+def train_opt(convkernel=0, rnn_dim=0, dropout=0.4, dropout_w=0.4, dropout_u=0.4):
 	
 	import argparse
 	###############################################################################################################################
@@ -28,6 +28,8 @@ def train_opt(convkernel=0, convwin=2, rnn_dim=0, bi_rmm=0, rnn_layers=0, embd_t
 	parser.add_argument("-v", "--vocab-size", dest="vocab_size", type=int, metavar='<int>', default=3733, help="Vocab size (default=4000)")
 	parser.add_argument("--aggregation", dest="aggregation", type=str, metavar='<str>', default='mot', help="The aggregation method for regp and bregp types (mot|attsum|attmean) (default=mot)")
 	parser.add_argument("--dropout", dest="dropout_prob", type=float, metavar='<float>', default=0.4, help="The dropout probability. To disable, give a negative number (default=0.4)")
+	parser.add_argument("--dropout-w", dest="dropout_w", type=float, metavar='<float>', default=0.0, help="The dropout probability of RNN W. To disable, give a negative number (default=0.4)")
+	parser.add_argument("--dropout-u", dest="dropout_u", type=float, metavar='<float>', default=0.0, help="The dropout probability of RNN U. To disable, give a negative number (default=0.4)")
 	parser.add_argument("--vocab-path", dest="vocab_path", type=str, metavar='<str>', default='data/vocab_p4_glove40W.pkl', help="(Optional) The path to the existing vocab file (*.pkl)")
 	parser.add_argument("--emb", dest="emb_path", type=str, metavar='<str>', default='data/glove.6B.50d.simple.txt', help="The path to the word embeddings file (Word2Vec format)")
 	parser.add_argument("--skip-init-bias", dest="skip_init_bias", action='store_true', help="Skip initialization of the last layer bias")
@@ -44,47 +46,24 @@ def train_opt(convkernel=0, convwin=2, rnn_dim=0, bi_rmm=0, rnn_layers=0, embd_t
 	parser.add_argument("--3layer-rnn", dest="rnn_3l", action='store_true', help="Set 3 layer RNN")
 	parser.add_argument("--onscreen", dest="onscreen", action='store_true', help="Show log on stdout")
 	args, _ = parser.parse_known_args()
-	
-	args.cnn_dim = int(round(convkernel))
-	args.cnn_window_size = int(round(convwin))
-	args.rnn_dim = int(round(rnn_dim))
-	if bi_rmm > 0.5:
-		args.bi = True
-		
-	if rnn_layers > 3:
-		args.rnn_3l = True
-	elif rnn_layers > 2:
-		args.rnn_2l = True
-	elif rnn_layers < 1:
-		args.rnn_dim = 0
-	
-	if embd_train > 0.5:
-		args.embd_train = True
 
-	if embd_dim > 3:
-		args.emb_path = 'data/glove.6B.300d.simple.txt'
-		args.emb_dim = 300
-		if tfidf > 0.5:
-			args.tfidf = 300
-	elif embd_dim > 2:
-		args.emb_path = 'data/glove.6B.200d.simple.txt'
-		args.emb_dim = 200
-		if tfidf > 0.5:
-			args.tfidf = 200
-	elif embd_dim > 1:
-		args.emb_path = 'data/glove.6B.100d.simple.txt'
-		args.emb_dim = 100
-		if tfidf > 0.5:
-			args.tfidf = 100
-	else:
-		args.emb_path = 'data/glove.6B.50d.simple.txt'
-		args.emb_dim = 50
-		if tfidf > 0.5:
-			args.tfidf = 50
-									
-	args.learning_rate = lr
+	args.cnn_window_size = 2	
+	args.cnn_dim = int(round(convkernel))
+	args.rnn_dim = int(round(rnn_dim))
 	args.dropout_prob = dropout
+	args.dropout_w = dropout_w
+	args.dropout_u = dropout_u
 	
+	args.bi = True		
+	args.rnn_3l = False
+	args.rnn_2l = True
+	args.embd_train = True
+
+	args.emb_path = 'data/glove.6B.300d.simple.txt'
+	args.emb_dim = 300
+	args.tfidf = 300
+									
+	args.learning_rate = 0.003	
 	args.batch_size = 374
 	args.plot = True
 	args.epochs = 50

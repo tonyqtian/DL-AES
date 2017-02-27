@@ -27,8 +27,15 @@ def create_model(args, initial_mean_value, overal_maxlen, vocab, pca_len):
 	## Create Model
 	#
 	
-	dropout_W = args.dropout_prob		# default=0.5
-	dropout_U = args.dropout_prob		# default=0.1
+	if args.dropout_w > 0:
+		dropout_W = args.dropout_w
+	else:
+		dropout_W = args.dropout_prob		# default=0.5
+	if args.dropout_u > 0:
+		dropout_U = args.dropout_u
+	else:
+		dropout_U = args.dropout_prob		# default=0.1
+	
 	cnn_border_mode='same'
 	if "reg" in args.model_type:
 		if initial_mean_value.ndim == 0:
