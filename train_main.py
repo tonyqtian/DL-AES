@@ -31,11 +31,8 @@ def train(args):
 	if args.seed > 0:
 		np.random.seed(args.seed)
 	
-	if args.prompt_id:
-		from nea.asap_evaluator import Evaluator
-		import nea.asap_reader as dataset
-	else:
-		raise NotImplementedError
+	from nea.asap_evaluator import Evaluator
+	import nea.asap_reader as dataset
 	
 	###############################################################################################################################
 	## Prepare data
@@ -134,7 +131,7 @@ def train(args):
 		test_y = to_categorical(test_y, categ)
 			
 	###############################################################################################################################
-	## Optimizaer algorithm
+	## Optimizer algorithm
 	#
 	
 	from nea.optimizers import get_optimizer	
