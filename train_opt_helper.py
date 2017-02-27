@@ -59,11 +59,11 @@ def train_opt(convkernel=0, rnn_dim=0, dropout=0.4, dropout_w=0.4, dropout_u=0.4
 	args.rnn_2l = True
 	args.embd_train = True
 
-	args.emb_path = 'data/glove.6B.300d.simple.txt'
-	args.emb_dim = 300
-	args.tfidf = 300
+	args.emb_path = 'data/glove.6B.50d.simple.txt'
+	args.emb_dim = 50
+	args.tfidf = 50
 									
-	args.learning_rate = 0.003	
+	args.learning_rate = 0.004
 	args.batch_size = 374
 	args.plot = True
 	args.epochs = 50

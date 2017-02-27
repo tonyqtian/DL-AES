@@ -15,13 +15,7 @@ args1 = parser.parse_args()
 
 gp_params = {"alpha": 1e5}
 
-# 	print(train_opt(3, 2, 0.1))
-# 	raise RuntimeError
-
-# 	svcBO = BayesianOptimization(train_opt, {'convkernel': (0, 16), 'convwin': (1, 5), 'dropout': (0.01, 0.99)})
-# 	svcBO.explore({'convkernel': [0, 8, 16], 'convwin': [2, 3, 4],'dropout': [0.4, 0.5, 0.6]})
-
-svcBO = BayesianOptimization(train_opt, {
+QWK = BayesianOptimization(train_opt, {
 # 										 'bi_rmm': (0, 1),
 # 										 'rnn_layers': (0, 3),
 # 										 'embd_train': (0, 1),
@@ -34,7 +28,7 @@ svcBO = BayesianOptimization(train_opt, {
 										 'dropout': (0.01, 0.99),
 										 'dropout_w': (0.01, 0.99),
 										 'dropout_u': (0.01, 0.99)})
-svcBO.explore({
+QWK.explore({
 # 			'bi_rmm':     [0, 0,  0,   1,  0,  1,],
 # 			'rnn_layers': [0, 0,  0,   0,  2,  2,],
 # 			'embd_train': [0, 0,  0,   1,  1,  1,],
@@ -48,13 +42,13 @@ svcBO.explore({
 			'dropout_w':  [0.2, 0.4, 0.4, 0.5, 0.4, 0.4, 0.4, 0.5,],
 			'dropout_u':  [0.2, 0.4, 0.4, 0.5, 0.4, 0.4, 0.3, 0.6,] })
 
-# 	svcBO.maximize(n_iter=10, acq='ucb', kappa=10, **gp_params)
-svcBO.maximize(n_iter=args1.iter, acq="poi", xi=0.1, **gp_params)
+#QWK.maximize(n_iter=10, acq='ucb', kappa=10, **gp_params)
+QWK.maximize(n_iter=args1.iter, acq="poi", xi=0.1, **gp_params)
 
 print('-'*53)
 print('Final Results')
-print('SVC: %f' % svcBO.res['max']['max_val'])
-print('Params: ', svcBO.res['max']['max_params'])
+print('QWK: %f' % QWK.res['max']['max_val'])
+print('Params: ', QWK.res['max']['max_params'])
 
 print('\a')
 sleep(0.3)

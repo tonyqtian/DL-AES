@@ -28,6 +28,8 @@ parser.add_argument("-b", "--batch-size", dest="batch_size", type=int, metavar='
 parser.add_argument("-v", "--vocab-size", dest="vocab_size", type=int, metavar='<int>', default=3733, help="Vocab size (default=4000)")
 parser.add_argument("--aggregation", dest="aggregation", type=str, metavar='<str>', default='mot', help="The aggregation method for regp and bregp types (mot|attsum|attmean) (default=mot)")
 parser.add_argument("--dropout", dest="dropout_prob", type=float, metavar='<float>', default=0.4, help="The dropout probability. To disable, give a negative number (default=0.4)")
+parser.add_argument("--dropout-w", dest="dropout_w", type=float, metavar='<float>', default=0.0, help="The dropout probability of RNN W. To disable, give a negative number (default=0.4)")
+parser.add_argument("--dropout-u", dest="dropout_u", type=float, metavar='<float>', default=0.0, help="The dropout probability of RNN U. To disable, give a negative number (default=0.4)")
 parser.add_argument("--vocab-path", dest="vocab_path", type=str, metavar='<str>', default='data/vocab_p4_glove40W.pkl', help="(Optional) The path to the existing vocab file (*.pkl)")
 parser.add_argument("--emb", dest="emb_path", type=str, metavar='<str>', default='data/glove.6B.50d.simple.txt', help="The path to the word embeddings file (Word2Vec format)")
 parser.add_argument("--skip-init-bias", dest="skip_init_bias", action='store_true', help="Skip initialization of the last layer bias")
