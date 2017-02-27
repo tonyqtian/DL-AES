@@ -21,7 +21,8 @@ def train(args):
 	timestr = U.set_logger(onscreen=args.onscreen, out_dir=out_dir)
 	U.print_args(args)
 	
-	assert args.model_type in {'mlp', 'cls', 'clsp', 'reg', 'regp', 'breg', 'bregp'}
+# 	assert args.model_type in {'mlp', 'cls', 'clsp', 'reg', 'regp', 'breg', 'bregp'}
+	assert args.model_type in {'cls', 'reg'}
 	assert args.algorithm in {'rmsprop', 'sgd', 'adagrad', 'adadelta', 'adam', 'adamax'}
 	assert args.loss in {'mse', 'mae', 'cnp'}
 	assert args.recurrent_unit in {'lstm', 'gru', 'simple'}
@@ -60,16 +61,16 @@ def train(args):
 			pk.dump(vocab, vocab_file)
 	
 	# Pad sequences for mini-batch processing
-	if args.model_type in {'breg', 'bregp', 'clsp', 'cls', 'mlp'}:
+# 	if args.model_type in {'breg', 'bregp', 'clsp', 'cls', 'mlp'}:
 	# 	assert args.rnn_dim > 0
 	# 	assert args.recurrent_unit == 'lstm'
-		train_x = sequence.pad_sequences(train_x, maxlen=overal_maxlen)
-		dev_x = sequence.pad_sequences(dev_x, maxlen=overal_maxlen)
-		test_x = sequence.pad_sequences(test_x, maxlen=overal_maxlen)
-	else:
-		train_x = sequence.pad_sequences(train_x)
-		dev_x = sequence.pad_sequences(dev_x)
-		test_x = sequence.pad_sequences(test_x)
+	train_x = sequence.pad_sequences(train_x, maxlen=overal_maxlen)
+	dev_x = sequence.pad_sequences(dev_x, maxlen=overal_maxlen)
+	test_x = sequence.pad_sequences(test_x, maxlen=overal_maxlen)
+# 	else:
+# 		train_x = sequence.pad_sequences(train_x)
+# 		dev_x = sequence.pad_sequences(dev_x)
+# 		test_x = sequence.pad_sequences(test_x)
 	
 	###############################################################################################################################
 	## Some statistics

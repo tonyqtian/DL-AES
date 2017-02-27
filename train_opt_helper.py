@@ -16,7 +16,7 @@ def train_opt(convkernel=0, rnn_dim=0, dropout=0.4, dropout_w=0.4, dropout_u=0.4
 	parser.add_argument("-ts", "--test", dest="test_path", type=str, metavar='<str>', default='data/test_s4.tsv', help="The path to the test set")
 	parser.add_argument("-o", "--out-dir", dest="out_dir_path", type=str, metavar='<str>', default='output', help="The path to the output directory")
 	parser.add_argument("-p", "--prompt", dest="prompt_id", type=int, metavar='<int>', default=4, help="Promp ID for ASAP dataset. '0' means all prompts.")
-	parser.add_argument("-m", "--model-type", dest="model_type", type=str, metavar='<str>', default='clsp', help="Model type (cls|clsp|reg|regp|breg|bregp) (default=regp)")
+	parser.add_argument("-m", "--model-type", dest="model_type", type=str, metavar='<str>', default='cls', help="Model type classification/regression (cls|reg) (default=cls)")
 	parser.add_argument("-u", "--rec-unit", dest="recurrent_unit", type=str, metavar='<str>', default='lstm', help="Recurrent unit type (lstm|gru|simple) (default=lstm)")
 	parser.add_argument("-a", "--algorithm", dest="algorithm", type=str, metavar='<str>', default='rmsprop', help="Optimization algorithm (rmsprop|sgd|adagrad|adadelta|adam|adamax) (default=rmsprop)")
 	parser.add_argument("-l", "--loss", dest="loss", type=str, metavar='<str>', default='mse', help="Loss function (mse|mae|cnp) (default=mse) set to cnp if cls model")
