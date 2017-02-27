@@ -268,9 +268,9 @@ def train(args):
 		plt.close()
 		
 		plt.plot(training_epochs, training_accuracy, 'b', label='Train Accuracy')
-		plt.plot(training_epochs, dev_accuracy, 'y', label='Dev Accuracy')
-		plt.plot(training_epochs, dev_qwks, 'ro', label='Dev QWK')
-		plt.plot(training_epochs, test_qwks, 'go', label='Test QWK')
+		plt.plot(training_epochs, dev_accuracy, 'g', label='Dev Accuracy')
+		plt.plot(training_epochs, dev_qwks, 'r.', label='Dev QWK')
+		plt.plot(training_epochs, test_qwks, 'y.', label='Test QWK')
 		plt.xlabel('epochs')
 		plt.legend()
 		plt.savefig(out_dir + '/' + timestr + 'QWK.png')
