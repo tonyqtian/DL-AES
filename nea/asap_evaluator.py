@@ -76,8 +76,8 @@ class Evaluator():
 		
 		if "reg" in self.arg.model_type:
 			if self.arg.normalize:
-				self.dev_pred = dataset.convert_to_dataset_friendly_scores(self.dev_pred, self.dev_pmt)
-				self.test_pred = dataset.convert_to_dataset_friendly_scores(self.test_pred, self.test_pmt)
+				self.dev_pred = dataset.convert_to_dataset_friendly_scores(self.dev_pred, self.dev_pmt, roundup=self.arg.roundup)
+				self.test_pred = dataset.convert_to_dataset_friendly_scores(self.test_pred, self.test_pmt, roundup=self.arg.roundup)
 		else:
 			self.dev_pred = dataset.convert_1hot_to_score(self.dev_pred)
 			self.test_pred = dataset.convert_1hot_to_score(self.test_pred)

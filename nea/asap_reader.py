@@ -216,7 +216,7 @@ def get_model_friendly_scores(scores_array, prompt_id_array):
 	assert np.all(scores_array >= 0) and np.all(scores_array <= 1)
 	return scores_array
 
-def convert_to_dataset_friendly_scores(scores_array, prompt_id_array):
+def convert_to_dataset_friendly_scores(scores_array, prompt_id_array, roundup=False):
 	arg_type = type(prompt_id_array)
 	assert arg_type in {int, np.ndarray}
 	if arg_type is int:
@@ -231,6 +231,8 @@ def convert_to_dataset_friendly_scores(scores_array, prompt_id_array):
 		for ii in range(dim):
 			low[ii], high[ii] = asap_ranges[prompt_id_array[ii]]
 		scores_array = scores_array * (high - low) + low
+		if roundup:
+			scores_array = np.rint(scores_array)
 	return scores_array
 
 def convert_1hot_to_score(scores_array):
