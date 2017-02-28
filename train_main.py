@@ -79,7 +79,7 @@ def train(args):
 	dev_y = np.array(dev_y, dtype=K.floatx())
 	test_y = np.array(test_y, dtype=K.floatx())
 	
-	if args.prompt_id:
+	if args.prompt_id >= 0:
 		train_pmt = np.array(train_pmt, dtype='int32')
 		dev_pmt = np.array(dev_pmt, dtype='int32')
 		test_pmt = np.array(test_pmt, dtype='int32')
