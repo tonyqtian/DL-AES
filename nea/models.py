@@ -72,7 +72,7 @@ def create_model(args, initial_mean_value, overal_maxlen, vocab):
 	#
 	
 	if args.model_type == 'cls':
-		logger.info('Building a REGRESSION model with POOLING')
+		logger.info('Building a CLASSIFICATION model with POOLING')
 	elif args.model_type == 'reg':
 		logger.info('Building a REGRESSION model with POOLING')
 	else:
