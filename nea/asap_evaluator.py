@@ -10,9 +10,10 @@ logger = logging.getLogger(__name__)
 
 class Evaluator():
 	
-	def __init__(self, arg, out_dir, dev_x, test_x, dev_y, test_y, dev_y_org, test_y_org, dev_pca=None, test_pca=None):
+	def __init__(self, arg, out_dir, dev_x, test_x, dev_y, test_y, dev_y_org, test_y_org, dev_pmt, test_pmt, dev_pca=None, test_pca=None):
 		self.arg = arg
-		self.prompt_id = self.arg.prompt_id
+		self.dev_pmt = dev_pmt
+		self.test_pmt = test_pmt
 		self.out_dir = out_dir
 		self.dev_x, self.test_x = dev_x, test_x
 		self.dev_y, self.test_y = dev_y, test_y
@@ -75,8 +76,8 @@ class Evaluator():
 		
 		if "reg" in self.arg.model_type:
 			if self.arg.normalize:
-				self.dev_pred = dataset.convert_to_dataset_friendly_scores(self.dev_pred, self.prompt_id)
-				self.test_pred = dataset.convert_to_dataset_friendly_scores(self.test_pred, self.prompt_id)
+				self.dev_pred = dataset.convert_to_dataset_friendly_scores(self.dev_pred, self.dev_pmt)
+				self.test_pred = dataset.convert_to_dataset_friendly_scores(self.test_pred, self.test_pmt)
 		else:
 			self.dev_pred = dataset.convert_1hot_to_score(self.dev_pred)
 			self.test_pred = dataset.convert_1hot_to_score(self.test_pred)

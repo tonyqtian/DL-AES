@@ -184,7 +184,7 @@ def train(args):
 	## Initialize Evaluator
 	#
 	
-	evl = Evaluator(args, out_dir, dev_x, test_x, dev_y, test_y, dev_y_org, test_y_org, dev_pca=dev_pca, test_pca=test_pca)
+	evl = Evaluator(args, out_dir, dev_x, test_x, dev_y, test_y, dev_y_org, test_y_org, dev_pmt, test_pmt, dev_pca=dev_pca, test_pca=test_pca)
 	
 	###############################################################################################################################
 	## Training
