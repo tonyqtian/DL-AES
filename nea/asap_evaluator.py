@@ -27,7 +27,6 @@ class Evaluator():
 		self.best_test_missed = -1
 		self.best_test_missed_epoch = -1
 		self.batch_size = 180
-		self.low, self.high = dataset.get_score_range(self.prompt_id)
 		self.dump_ref_scores()
 		self.dev_pca = dev_pca
 		self.test_pca = test_pca
@@ -53,10 +52,10 @@ class Evaluator():
 		# Kappa only supports integer values
 		dev_pred_int = np.rint(dev_pred).astype('int32')
 		test_pred_int = np.rint(test_pred).astype('int32')
-		dev_qwk = qwk(self.dev_y_org, dev_pred_int, self.low, self.high)
-		test_qwk = qwk(self.test_y_org, test_pred_int, self.low, self.high)
-		dev_lwk = lwk(self.dev_y_org, dev_pred_int, self.low, self.high)
-		test_lwk = lwk(self.test_y_org, test_pred_int, self.low, self.high)
+		dev_qwk = qwk(self.dev_y_org, dev_pred_int)
+		test_qwk = qwk(self.test_y_org, test_pred_int)
+		dev_lwk = lwk(self.dev_y_org, dev_pred_int)
+		test_lwk = lwk(self.test_y_org, test_pred_int)
 		return dev_qwk, test_qwk, dev_lwk, test_lwk
 	
 	def evaluate(self, model, epoch, print_info=False):
@@ -75,8 +74,9 @@ class Evaluator():
 			self.test_pred = model.predict(self.test_x, batch_size=self.batch_size).squeeze()
 		
 		if "reg" in self.arg.model_type:
-			self.dev_pred = dataset.convert_to_dataset_friendly_scores(self.dev_pred, self.prompt_id)
-			self.test_pred = dataset.convert_to_dataset_friendly_scores(self.test_pred, self.prompt_id)
+# 			self.dev_pred = dataset.convert_to_dataset_friendly_scores(self.dev_pred, self.prompt_id)
+# 			self.test_pred = dataset.convert_to_dataset_friendly_scores(self.test_pred, self.prompt_id)
+			pass
 		else:
 			self.dev_pred = dataset.convert_1hot_to_score(self.dev_pred)
 			self.test_pred = dataset.convert_1hot_to_score(self.test_pred)

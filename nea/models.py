@@ -149,7 +149,7 @@ def create_model(args, initial_mean_value, overal_maxlen, vocab):
 		if args.model_type == 'cls':
 			predictions = Dense(num_outputs, activation='softmax')(tfidfmerged)
 		elif args.model_type == 'reg':
-			predictions = Dense(num_outputs, activation='sigmoid')(tfidfmerged)
+			predictions = Dense(num_outputs, activation='leaner')(tfidfmerged)
 		else:
 			raise NotImplementedError
 		
@@ -176,7 +176,7 @@ def create_model(args, initial_mean_value, overal_maxlen, vocab):
 		if args.model_type == 'cls':
 			predictions = Dense(num_outputs, activation='softmax')(z)
 		elif args.model_type == 'reg':
-			predictions = Dense(num_outputs, activation='sigmoid')(z)
+			predictions = Dense(num_outputs, activation='linear')(z)
 		else:
 			raise NotImplementedError
 		
