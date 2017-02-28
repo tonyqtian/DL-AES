@@ -12,7 +12,7 @@ def set_logger(onscreen=True, out_dir=None):
 	if onscreen:
 		console_format = BColors.OKBLUE + '[%(levelname)s]' + BColors.ENDC + ' (%(name)s) %(message)s'
 		#datefmt='%Y-%m-%d %Hh-%Mm-%Ss'
-		console = logging.StreamHandler()
+		console = logging.StreamHandler(sys.stdout)
 		console.setLevel(logging.DEBUG)
 		console.setFormatter(logging.Formatter(console_format))
 		logger.addHandler(console)
