@@ -47,6 +47,7 @@ def train_opt(convkernel=0, rnn_dim=0, dropout=0.4, dropout_w=0.4, dropout_u=0.4
 	parser.add_argument("--onscreen", dest="onscreen", action='store_true', help="Show log on stdout")
 	parser.add_argument("--earlystop", dest="earlystop", type=float, metavar='<float>', default=0.0, help="Use early stop")
 	parser.add_argument("--normalize", dest="normalize", action='store_true', help="Normalize score to 0~1 when use reg model")
+	parser.add_argument("--verbose", dest="verbose", type=int, metavar='<int>', default=1, help="Show training process bar during train and val")
 	args, _ = parser.parse_known_args()
 
 	args.cnn_window_size = 2

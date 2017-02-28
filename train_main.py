@@ -210,9 +210,9 @@ def train(args):
 		# Training
 		t0 = time()
 		if args.tfidf > 0:
-			train_history = model.fit([train_x, train_pca], train_y, batch_size=args.batch_size, nb_epoch=1, verbose=1)
+			train_history = model.fit([train_x, train_pca], train_y, batch_size=args.batch_size, nb_epoch=1, verbose=args.verbose)
 		else:
-			train_history = model.fit(train_x, train_y, batch_size=args.batch_size, nb_epoch=1, verbose=1)
+			train_history = model.fit(train_x, train_y, batch_size=args.batch_size, nb_epoch=1, verbose=args.verbose)
 		tr_time = time() - t0
 		total_train_time += tr_time
 		
