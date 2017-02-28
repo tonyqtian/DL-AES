@@ -117,11 +117,12 @@ def train(args):
 	test_y_org = test_y.astype(dataset.get_ref_dtype())
 	
 	if "reg" in args.model_type:
-		# Convert scores to boundary of [0 1] for training and evaluation (loss calculation)
-# 		train_y = dataset.get_model_friendly_scores(train_y, train_pmt)
-# 		dev_y = dataset.get_model_friendly_scores(dev_y, dev_pmt)
-# 		test_y = dataset.get_model_friendly_scores(test_y, test_pmt)
-		pass
+		if args.normalize:
+			logger.info('  normalize score to range (0,1)')
+			# Convert scores to boundary of [0 1] for training and evaluation (loss calculation)
+			train_y = dataset.get_model_friendly_scores(train_y, train_pmt)
+			dev_y = dataset.get_model_friendly_scores(dev_y, dev_pmt)
+			test_y = dataset.get_model_friendly_scores(test_y, test_pmt)
 	else:
 		logger.info('  covert train_y to one hot shape')
 		assert len(bincounts) == 1, "support only one y value"

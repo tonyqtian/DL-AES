@@ -46,6 +46,7 @@ parser.add_argument("--2layer-rnn", dest="rnn_2l", action='store_true', help="Se
 parser.add_argument("--3layer-rnn", dest="rnn_3l", action='store_true', help="Set 3 layer RNN")
 parser.add_argument("--onscreen", dest="onscreen", action='store_true', help="Show log on stdout")
 parser.add_argument("--earlystop", dest="earlystop", type=float, metavar='<float>', default=0.0, help="Use early stop")
+parser.add_argument("--normalize", dest="normalize", action='store_true', help="Normalize score to 0~1 when use reg model")
 args = parser.parse_args()
 
 from train_main import train

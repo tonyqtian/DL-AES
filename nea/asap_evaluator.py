@@ -74,9 +74,9 @@ class Evaluator():
 			self.test_pred = model.predict(self.test_x, batch_size=self.batch_size).squeeze()
 		
 		if "reg" in self.arg.model_type:
-# 			self.dev_pred = dataset.convert_to_dataset_friendly_scores(self.dev_pred, self.prompt_id)
-# 			self.test_pred = dataset.convert_to_dataset_friendly_scores(self.test_pred, self.prompt_id)
-			pass
+			if arg.normalize:
+				self.dev_pred = dataset.convert_to_dataset_friendly_scores(self.dev_pred, self.prompt_id)
+				self.test_pred = dataset.convert_to_dataset_friendly_scores(self.test_pred, self.prompt_id)
 		else:
 			self.dev_pred = dataset.convert_1hot_to_score(self.dev_pred)
 			self.test_pred = dataset.convert_1hot_to_score(self.test_pred)

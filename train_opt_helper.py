@@ -46,6 +46,7 @@ def train_opt(convkernel=0, rnn_dim=0, dropout=0.4, dropout_w=0.4, dropout_u=0.4
 	parser.add_argument("--3layer-rnn", dest="rnn_3l", action='store_true', help="Set 3 layer RNN")
 	parser.add_argument("--onscreen", dest="onscreen", action='store_true', help="Show log on stdout")
 	parser.add_argument("--earlystop", dest="earlystop", type=float, metavar='<float>', default=0.0, help="Use early stop")
+	parser.add_argument("--normalize", dest="normalize", action='store_true', help="Normalize score to 0~1 when use reg model")
 	args, _ = parser.parse_known_args()
 
 	args.cnn_window_size = 2
