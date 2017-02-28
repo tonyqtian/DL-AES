@@ -73,8 +73,13 @@ def create_model(args, initial_mean_value, overal_maxlen, vocab):
 	
 	if args.model_type == 'cls':
 		logger.info('Building a CLASSIFICATION model with POOLING')
+		final_activation = 'softmax'
 	elif args.model_type == 'reg':
 		logger.info('Building a REGRESSION model with POOLING')
+		if args.normalize:
+			final_activation = 'sigmoid'
+		else:
+			final_activation = 'linear'
 	else:
 		raise NotImplementedError
 	
@@ -141,17 +146,12 @@ def create_model(args, initial_mean_value, overal_maxlen, vocab):
 			
 		# Optional Dense Layer	
 		if args.dense > 0:
-			tfidfmerged = Dense(args.dense, activation='tanh')(tfidfmerged)
+			tfidfmerged = Dense(args.dense, activation=args.dense_activation)(tfidfmerged)
 			if args.dropout_prob > 0:
 				tfidfmerged = Dropout(args.dropout_prob)(tfidfmerged)
 				
 		# Final Prediction Layer
-		if args.model_type == 'cls':
-			predictions = Dense(num_outputs, activation='softmax')(tfidfmerged)
-		elif args.model_type == 'reg':
-			predictions = Dense(num_outputs, activation='linear')(tfidfmerged)
-		else:
-			raise NotImplementedError
+		predictions = Dense(num_outputs, activation=final_activation)(tfidfmerged)
 		
 	else: # if no rnn
 		if args.dropout_prob > 0:
@@ -169,16 +169,11 @@ def create_model(args, initial_mean_value, overal_maxlen, vocab):
 			z = x
 		# Optional Dense Layer
 		if args.dense > 0:
-			z = Dense(args.dense, activation='tanh')(z)
+			z = Dense(args.dense, activation=args.dense_activation)(z)
 			if args.dropout_prob > 0:
 				z = Dropout(args.dropout_prob)(z)
 		# Final Prediction Layer
-		if args.model_type == 'cls':
-			predictions = Dense(num_outputs, activation='softmax')(z)
-		elif args.model_type == 'reg':
-			predictions = Dense(num_outputs, activation='linear')(z)
-		else:
-			raise NotImplementedError
+		predictions = Dense(num_outputs, activation=final_activation)(z)
 		
 	# Model Input/Output	
 	if args.tfidf > 0:

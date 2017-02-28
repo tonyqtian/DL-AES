@@ -206,6 +206,11 @@ def train(args):
 		dev_qwks = []
 		test_qwks = []
 	
+# 	if args.tfidf > 0:
+# 		train_history = model.fit([train_x, train_pca], train_y, validation_data=(dev_x, dev_y), batch_size=args.batch_size, nb_epoch=args.epochs, verbose=args.verbose, callbacks=[TestCallback((X_test, Y_test))])
+# 	else:
+# 		train_history = model.fit(train_x, train_y, validation_data=(dev_x, dev_y), batch_size=args.batch_size, nb_epoch=args.epochs, verbose=args.verbose)
+	
 	for ii in range(args.epochs):
 		# Training
 		t0 = time()
