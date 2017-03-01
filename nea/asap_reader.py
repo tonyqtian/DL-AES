@@ -216,7 +216,7 @@ def get_model_friendly_scores(scores_array, prompt_id_array):
 	assert np.all(scores_array >= 0) and np.all(scores_array <= 1)
 	return scores_array
 
-def convert_to_dataset_friendly_scores(scores_array, prompt_id_array, roundup=False):
+def convert_to_dataset_friendly_scores(scores_array, prompt_id_array):
 	arg_type = type(prompt_id_array)
 	assert arg_type in {int, np.ndarray}
 	if arg_type is int:
@@ -231,8 +231,6 @@ def convert_to_dataset_friendly_scores(scores_array, prompt_id_array, roundup=Fa
 		for ii in range(dim):
 			low[ii], high[ii] = asap_ranges[prompt_id_array[ii]]
 		scores_array = scores_array * (high - low) + low
-		if roundup:
-			scores_array = np.rint(scores_array)
 	return scores_array
 
 def convert_1hot_to_score(scores_array):
@@ -380,7 +378,10 @@ def read_dataset(file_path, prompt_id, maxlen, vocab, tokenize_text, to_lower, s
 	return data_x, data_y, prompt_ids, maxlen_x
 
 def get_data(paths, prompt_id, vocab_size, maxlen, tokenize_text=False, to_lower=True, sort_by_len=False, vocab_path=None, score_index=6):
-	train_path, dev_path, test_path = paths[0], paths[1], paths[2]
+	if len(paths) == 3:
+		train_path, dev_path, test_path = paths[0], paths[1], paths[2]
+	else:
+		train_path, test_path = paths[0], paths[1]
 	
 	if not vocab_path:
 		vocab = create_vocab(train_path, prompt_id, maxlen, vocab_size, tokenize_text, to_lower)
@@ -395,9 +396,16 @@ def get_data(paths, prompt_id, vocab_size, maxlen, tokenize_text=False, to_lower
 	logger.info('  Vocab size: %i' % (len(vocab)))
 	
 	train_x, train_y, train_prompts, train_maxlen = read_dataset(train_path, prompt_id, maxlen, vocab, tokenize_text, to_lower)
-	dev_x, dev_y, dev_prompts, dev_maxlen = read_dataset(dev_path, prompt_id, 0, vocab, tokenize_text, to_lower)
+	if len(paths) == 3:
+		dev_x, dev_y, dev_prompts, dev_maxlen = read_dataset(dev_path, prompt_id, 0, vocab, tokenize_text, to_lower)
 	test_x, test_y, test_prompts, test_maxlen = read_dataset(test_path, prompt_id, 0, vocab, tokenize_text, to_lower)
 	
-	overal_maxlen = max(train_maxlen, dev_maxlen, test_maxlen)
+	if len(paths) == 3:
+		overal_maxlen = max(train_maxlen, dev_maxlen, test_maxlen)
+	else:
+		overal_maxlen = max(train_maxlen, test_maxlen)
 	
-	return ((train_x,train_y,train_prompts), (dev_x,dev_y,dev_prompts), (test_x,test_y,test_prompts), vocab, len(vocab), overal_maxlen, 1)
+	if len(paths) == 3:
+		return ((train_x,train_y,train_prompts), (dev_x,dev_y,dev_prompts), (test_x,test_y,test_prompts), vocab, overal_maxlen)
+	else:
+		return ((train_x,train_y,train_prompts), (test_x,test_y,test_prompts), vocab, overal_maxlen)
