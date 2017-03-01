@@ -114,7 +114,8 @@ class Evaluator(Callback):
 # 			self.best_test = [self.test_qwk, self.test_lwk, self.test_prs, self.test_spr, self.test_tau]
 			self.best_test = test_qwk
 			self.best_epoch = epoch
-# 			model.save_weights(self.out_dir + '/best_model_weights.h5', overwrite=True)
+			if epoch > 5:
+				model.save_weights(self.out_dir + '/best_model_weights.h5', overwrite=True)
 	
 # 		if self.test_qwk > self.best_test_missed:
 # 			self.best_test_missed = self.test_qwk
