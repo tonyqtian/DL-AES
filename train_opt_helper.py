@@ -48,7 +48,7 @@ def train_opt(convkernel=0, rnn_dim=0, dropout=0.4, dropout_w=0.4, dropout_u=0.4
 	parser.add_argument("--earlystop", dest="earlystop", type=float, metavar='<int>', default=4, help="Use early stop")
 	parser.add_argument("--normalize", dest="normalize", action='store_true', help="Normalize score to 0~1 when use reg model")
 	parser.add_argument("--verbose", dest="verbose", type=int, metavar='<int>', default=1, help="Show training process bar during train and val")
-	parser.add_argument("--dense-activation", dest="dense_activation", type=str, metavar='<str>', default='tanh', help="Dense layer activation type (tanh|sigmoid|relu) (default=tanh)")
+# 	parser.add_argument("--dense-activation", dest="dense_activation", type=str, metavar='<str>', default='tanh', help="Dense layer activation type (tanh|sigmoid|relu) (default=tanh)")
 	parser.add_argument("--valid-split", dest="valid_split", type=float, metavar='<float>', default=0.0, help="Split validation set from training set (default=0.0)")
 	args, _ = parser.parse_known_args()
 
