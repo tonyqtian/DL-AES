@@ -12,6 +12,7 @@ from keras.utils.np_utils import to_categorical
 
 import matplotlib
 from keras.callbacks import EarlyStopping
+from keras.metrics import hinge
 matplotlib.use('Agg')
 
 logger = logging.getLogger(__name__)
@@ -25,7 +26,7 @@ def train(args):
 # 	assert args.model_type in {'mlp', 'cls', 'clsp', 'reg', 'regp', 'breg', 'bregp'}
 	assert args.model_type in {'cls', 'reg'}
 	assert args.algorithm in {'rmsprop', 'sgd', 'adagrad', 'adadelta', 'adam', 'adamax'}
-	assert args.loss in {'mse', 'mae', 'cnp'}
+	assert args.loss in {'mse', 'mae', 'cnp', 'hinge'}
 	assert args.recurrent_unit in {'lstm', 'gru', 'simple'}
 	assert args.aggregation in {'mot', 'attsum', 'attmean'}
 	
@@ -165,14 +166,22 @@ def train(args):
 		if args.loss == 'mae':
 			loss = 'mean_absolute_error'
 			metric = 'mean_squared_error'
-		else:
+		elif args.loss == 'mse':
 			loss = 'mean_squared_error'
 			metric = 'mean_absolute_error'
+		else:
+			raise NotImplementedError
 	else:
 		logger.info('  use classification model')
 		final_categ = categ
-		loss = 'categorical_crossentropy'
-		metric = 'categorical_accuracy'
+		if args.loss == 'cnp':
+			loss = 'categorical_crossentropy'
+			metric = 'categorical_accuracy'
+		elif args.loss == 'hinge':
+			loss = 'hinge'
+			metric = 'squared_hinge'
+		else:
+			raise NotImplementedError
 	
 	from nea.models import create_model		
 	model = create_model(args, final_categ, overal_maxlen, vocab)

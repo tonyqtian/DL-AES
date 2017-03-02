@@ -74,10 +74,13 @@ def create_model(args, initial_mean_value, overal_maxlen, vocab):
 	
 	if args.model_type == 'cls':
 		logger.info('Building a CLASSIFICATION model with POOLING')
-		final_activation = 'softmax'
 		final_init = 'he_uniform'
 		dense_activation = 'tanh'
 		dense_init = 'he_normal'
+		if args.loss == 'cnp':
+			final_activation = 'softmax'
+		elif args.loss == 'hinge':
+			final_activation = 'linear'
 	elif args.model_type == 'reg':
 		logger.info('Building a REGRESSION model with POOLING')
 		if args.normalize:

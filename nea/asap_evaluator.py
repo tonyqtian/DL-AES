@@ -130,7 +130,7 @@ class Evaluator(Callback):
 		self.losses.append(logs.get('loss'))
 		self.val_losses.append(logs.get('val_loss'))
 		self.accs.append(logs.get(self.metric))		
-		self.val_accs.append(logs.get(self.metric))	
+		self.val_accs.append(logs.get(self.val_metric))	
 		self.test_qwks.append( self.eval(self.model, epoch, print_info=True) )
 		if self.arg.plot:
 			self.plothem()
@@ -139,16 +139,16 @@ class Evaluator(Callback):
 	def plothem(self):
 		training_epochs = [i for i in range(len(self.losses))]
 		plt.plot(training_epochs, self.losses, 'b', label='Train Loss')
-		plt.plot(training_epochs, self.accs, 'r.', label='Train Accuracy')
+		plt.plot(training_epochs, self.accs, 'r.', label='Train Metric')
 		plt.plot(training_epochs, self.val_losses, 'g', label='Valid Loss')
-		plt.plot(training_epochs, self.val_accs, 'y.', label='Valid Accuracy')
+		plt.plot(training_epochs, self.val_accs, 'y.', label='Valid Metric')
 		plt.legend()
 		plt.xlabel('epochs')
 		plt.savefig(self.out_dir + '/' + self.timestr + 'LossAccuracy.png')
 		plt.close()
 		
-		plt.plot(training_epochs, self.accs, 'b', label='Train Accuracy')
-		plt.plot(training_epochs, self.val_accs, 'g', label='Valid Accuracy')
+		plt.plot(training_epochs, self.accs, 'b', label='Train Metric')
+		plt.plot(training_epochs, self.val_accs, 'g', label='Valid Metric')
 		plt.plot(training_epochs, self.test_qwks, 'r.', label='Test QWK')
 		plt.xlabel('epochs')
 		plt.legend()
