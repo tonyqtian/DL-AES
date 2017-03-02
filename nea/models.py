@@ -7,6 +7,7 @@ from keras.models import Model
 from keras.layers.core import Activation, Dense, Dropout
 from nea.my_layers import Attention, MeanOverTime, Conv1DWithMasking
 from keras.layers.normalization import BatchNormalization
+from keras.regularizers import l2, activity_l2
 from keras.engine.topology import Input, merge
 
 logger = logging.getLogger(__name__)
@@ -159,7 +160,10 @@ def create_model(args, initial_mean_value, overal_maxlen, vocab):
 			
 		# Optional Dense Layer	
 		if args.dense > 0:
-			tfidfmerged = Dense(args.dense, init=dense_init)(tfidfmerged)
+			if args.loss == 'hinge':
+				tfidfmerged = Dense(num_outputs, init=final_init, W_regularizer=l2(0.001), activity_regularizer=activity_l2(0.001) )(tfidfmerged)
+			else:
+				tfidfmerged = Dense(num_outputs, init=final_init)(tfidfmerged)
 			if final_activation == 'relu' or final_activation == 'linear':
 				tfidfmerged = BatchNormalization()(tfidfmerged)
 			tfidfmerged = Activation(dense_activation)(tfidfmerged)
@@ -167,7 +171,10 @@ def create_model(args, initial_mean_value, overal_maxlen, vocab):
 				tfidfmerged = Dropout(args.dropout_prob)(tfidfmerged)
 			
 		# Final Prediction Layer
-		tfidfmerged = Dense(num_outputs, init=final_init)(tfidfmerged)
+		if args.loss == 'hinge':
+			tfidfmerged = Dense(num_outputs, init=final_init, W_regularizer=l2(0.001), activity_regularizer=activity_l2(0.001) )(tfidfmerged)
+		else:
+			tfidfmerged = Dense(num_outputs, init=final_init)(tfidfmerged)
 		if final_activation == 'relu' or final_activation == 'linear':
 			tfidfmerged = BatchNormalization()(tfidfmerged)
 		predictions = Activation(final_activation)(tfidfmerged)
@@ -188,14 +195,20 @@ def create_model(args, initial_mean_value, overal_maxlen, vocab):
 			z = x
 		# Optional Dense Layer
 		if args.dense > 0:
-			z = Dense(args.dense, init=dense_init)(z)
+			if args.loss == 'hinge':
+				z = Dense(args.dense, init=dense_init, W_regularizer=l2(0.001), activity_regularizer=activity_l2(0.001) )(z)
+			else:
+				z = Dense(args.dense, init=dense_init)(z)
 			if final_activation == 'relu' or final_activation == 'linear':
 				z = BatchNormalization()(z)	
 			z = Activation(dense_activation)(z)
 			if args.dropout_prob > 0:
 				z = Dropout(args.dropout_prob)(z)
 		# Final Prediction Layer
-		z = Dense(num_outputs, init=final_init)(z)
+		if args.loss == 'hinge':
+			z = Dense(num_outputs, init=final_init, W_regularizer=l2(0.001), activity_regularizer=activity_l2(0.001) )(z)
+		else:
+			z = Dense(args.dense, init=dense_init)(z)
 		if final_activation == 'relu' or final_activation == 'linear':
 			z = BatchNormalization()(z)
 		predictions = Activation(final_activation)(z)
