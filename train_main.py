@@ -26,9 +26,9 @@ def train(args):
 # 	assert args.model_type in {'mlp', 'cls', 'clsp', 'reg', 'regp', 'breg', 'bregp'}
 	assert args.model_type in {'cls', 'reg'}
 	assert args.algorithm in {'rmsprop', 'sgd', 'adagrad', 'adadelta', 'adam', 'adamax'}
-	assert args.loss in {'mse', 'mae', 'cnp', 'hinge'}
+	assert args.loss in {'mse', 'mae', 'cnp', 'hng'}
 	assert args.recurrent_unit in {'lstm', 'gru', 'simple'}
-	assert args.aggregation in {'mot', 'attsum', 'attmean'}
+	assert args.aggregation in {'mot', 'sot'}
 	
 	if args.seed > 0:
 		np.random.seed(args.seed)
@@ -177,7 +177,7 @@ def train(args):
 		if args.loss == 'cnp':
 			loss = 'categorical_crossentropy'
 			metric = 'categorical_accuracy'
-		elif args.loss == 'hinge':
+		elif args.loss == 'hng':
 			loss = 'hinge'
 			metric = 'squared_hinge'
 		else:

@@ -19,7 +19,7 @@ def train_opt(convkernel=0, rnn_dim=0, dropout=0.4, dropout_w=0.4, dropout_u=0.4
 	parser.add_argument("-m", "--model-type", dest="model_type", type=str, metavar='<str>', default='cls', help="Model type classification/regression (cls|reg) (default=cls)")
 	parser.add_argument("-u", "--rec-unit", dest="recurrent_unit", type=str, metavar='<str>', default='lstm', help="Recurrent unit type (lstm|gru|simple) (default=lstm)")
 	parser.add_argument("-a", "--algorithm", dest="algorithm", type=str, metavar='<str>', default='rmsprop', help="Optimization algorithm (rmsprop|sgd|adagrad|adadelta|adam|adamax) (default=rmsprop)")
-	parser.add_argument("-l", "--loss", dest="loss", type=str, metavar='<str>', default='mse', help="Loss function (mse|mae|cnp) (default=mse) set to cnp if cls model")
+	parser.add_argument("-l", "--loss", dest="loss", type=str, metavar='<str>', default='mse', help="Loss function (mse|mae|cnp|hng) (default=mse) set to cnp if cls model")
 	parser.add_argument("-e", "--embdim", dest="emb_dim", type=int, metavar='<int>', default=50, help="Embeddings dimension (default=50)")
 	parser.add_argument("-c", "--cnn-kernel", dest="cnn_dim", type=int, metavar='<int>', default=0, help="CNN output dimension. '0' means no CNN layer (default=0)")
 	parser.add_argument("-w", "--cnnwin", dest="cnn_window_size", type=int, metavar='<int>', default=3, help="CNN window size. (default=3)")
