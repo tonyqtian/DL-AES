@@ -1,4 +1,4 @@
-import token_gen
+from nea.token_gen import tokenize
 # import nltk
 from nltk import pos_tag
 # import enchant
@@ -68,7 +68,7 @@ class features:
 		# self.token_arr = nltk.tokenize.word_tokenize(self.essay)
 		# self.punc_arr = [x for x in self.token_arr if x in PUNCTUATION]
 
-		self.token_arr, self.punc_arr = token_gen.tokenize([self.essay])
+		self.token_arr, self.punc_arr = tokenize([self.essay])
 		
 	def set_word_count(self, min_len):
 		"""

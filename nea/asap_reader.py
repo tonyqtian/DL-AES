@@ -6,8 +6,8 @@ import logging
 import re
 import numpy as np
 import pickle as pk
-from fileparse import features
-from token_gen import tokenize_cleaner, sentence_cleaner
+from nea.fileparse import features
+from nea.token_gen import tokenize_cleaner, sentence_cleaner
 from tqdm import tqdm
 
 logger = logging.getLogger(__name__)
