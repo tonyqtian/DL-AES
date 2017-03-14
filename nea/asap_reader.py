@@ -6,6 +6,9 @@ import logging
 import re
 import numpy as np
 import pickle as pk
+from fileparse import features
+from token_gen import tokenize_cleaner, sentence_cleaner
+from tqdm import tqdm
 
 logger = logging.getLogger(__name__)
 num_regex = re.compile('^[+-]?[0-9]+\.?[0-9]*$')
@@ -36,168 +39,6 @@ def tokenize(string):
 
 def get_score_range(prompt_id):
 	return asap_ranges[prompt_id]
-
-def tokenize_cleaner(text, lower=True):
-	if lower:
-		text = text.lower()
-	
-	text = text.replace('can’t', 'cannot')
-	text = text.replace('it’s', 'it is')
-	text = text.replace('n’t', ' not')
-	text = text.replace('’ll', ' will')
-	text = text.replace('’s', ' ’s')
-	text = text.replace('’ve', ' have')
-	text = text.replace('’d', ' would')
-	text = text.replace('’m', ' am')
-	
-	text = text.replace('can`t', 'cannot')
-	text = text.replace('it`s', 'it is')
-	text = text.replace('n`t', ' not')
-	text = text.replace('`ll', ' will')
-	text = text.replace('`s', ' ’s')
-	text = text.replace('`ve', ' have')
-	text = text.replace('`d', ' would')
-	text = text.replace('`m', ' am')
-	
-	text = text.replace("can't", "cannot")
-	text = text.replace("it's", "it is")
-	text = text.replace("n't", " not")
-	text = text.replace("'ll", " will")
-	text = text.replace("'s", " ’s")
-	text = text.replace("'ve", " have")
-	text = text.replace("'d", " would")
-	text = text.replace("'m", " am")
-	
-	#for ASAP text
-	text = text.replace("&lt;", " ")
-	text = text.replace('â€™', ' ')
-	text = text.replace('â€\x9d', ' ')
-	text = text.replace('â€œ', ' ')
-	text = text.replace('¶', ' ')
-	if lower:
-		text = text.replace("lüsted", "")
-		text = text.replace("minfong", "")
-	else:
-		text = text.replace("Lüsted", "")
-		text = text.replace("Minfong", "")
-	text = text.replace(" didnt ", " did not ")
-	text = text.replace(" shouldnt ", " should not ")
-	text = text.replace(" doesnt ", " does not ")
-	text = text.replace(" wasnt ", " was not ")
-	text = text.replace(" isnt ", " is not ")
-	text = text.replace(" cant ", " cannot ")
-	text = text.replace("travelling", "traveling")
-	if lower:
-		text = re.sub(r'@([A-Za-z])+\d+', lambda pat: pat.group().strip('@1234567890').lower(), text)
-	else:
-		text = re.sub(r'@([A-Z])+\d+', lambda pat: pat.group().strip('@1234567890').lower(), text)
-
-	text = text.replace('…', ' ')
-	text = text.replace('”', ' ')
-	text = text.replace('“', ' ')
-	text = text.replace('‘', ' ')
-	text = text.replace('’', ' ')
-	
-	text = text.replace(',', ' ')
-	text = text.replace('.', ' ')
-	text = text.replace('(', ' ')
-	text = text.replace(')', ' ')
-	text = text.replace('[', ' ')
-	text = text.replace(']', ' ')
-	text = text.replace(':', ' ')
-	text = text.replace("'", " ")
-	text = text.replace('?', ' ')
-	text = text.replace('!', ' ')
-	text = text.replace(';', ' ')
-	text = text.replace('&', ' ')
-	text = text.replace('/', ' ')
-	text = text.replace('-', ' ')
-	text = text.replace('+', ' ')
-	text = text.replace('#', ' ')    
-	text = text.replace('"', ' ')
-	
-	return text
-
-def sentence_cleaner(text, lower=False):
-	if lower:
-		text = text.lower()
-	
-	text = text.replace('can’t', 'cannot')
-	text = text.replace('it’s', 'it is')
-	text = text.replace('n’t', ' not')
-	text = text.replace('’ll', ' will')
-	text = text.replace('’s', ' ’s')
-	text = text.replace('’ve', ' have')
-	text = text.replace('’d', ' would')
-	text = text.replace('’m', ' am')
-	
-	text = text.replace('can`t', 'cannot')
-	text = text.replace('it`s', 'it is')
-	text = text.replace('n`t', ' not')
-	text = text.replace('`ll', ' will')
-	text = text.replace('`s', ' ’s')
-	text = text.replace('`ve', ' have')
-	text = text.replace('`d', ' would')
-	text = text.replace('`m', ' am')
-	
-	text = text.replace("can't", "cannot")
-	text = text.replace("it's", "it is")
-	text = text.replace("n't", " not")
-	text = text.replace("'ll", " will")
-	text = text.replace("'s", " ’s")
-	text = text.replace("'ve", " have")
-	text = text.replace("'d", " would")
-	text = text.replace("'m", " am")
-	
-	#for ASAP text
-	text = text.replace("&lt;", " ")
-	text = text.replace('â€™', ' ')
-	text = text.replace('â€\x9d', ' ')
-	text = text.replace('â€œ', ' ')
-	text = text.replace('¶', ' ')
-	if lower:
-		text = text.replace("lüsted", "")
-		text = text.replace("minfong", "")
-	else:
-		text = text.replace("Lüsted", "")
-		text = text.replace("Minfong", "")
-	text = text.replace(" didnt ", " did not ")
-	text = text.replace(" shouldnt ", " should not ")
-	text = text.replace(" doesnt ", " does not ")
-	text = text.replace(" wasnt ", " was not ")
-	text = text.replace(" isnt ", " is not ")
-	text = text.replace(" cant ", " cannot ")
-	text = text.replace("travelling", "traveling")
-	if lower:
-		text = re.sub(r'@([A-Za-z])+\d+', lambda pat: pat.group().strip('@1234567890').lower(), text)
-	else:
-		text = re.sub(r'@([A-Z])+\d+', lambda pat: pat.group().strip('@1234567890').lower(), text)
-
-	text = text.replace('…', ' … ')
-	text = text.replace('”', ' ” ')
-	text = text.replace('“', ' “ ')
-	text = text.replace('/', ' / ')
-	text = text.replace('‘', ' ‘ ')
-	text = text.replace('’', ' ’ ')
-	
-	text = text.replace(',', ' , ')
-	text = text.replace('.', ' . ')
-	text = text.replace('(', ' ( ')
-	text = text.replace(')', ' ) ')
-	text = text.replace('[', ' ( ')
-	text = text.replace(']', ' ) ')
-	text = text.replace(':', ' : ')
-	text = text.replace("'", " ' ")
-	text = text.replace('?', ' ? ')
-	text = text.replace('!', ' ! ')
-	text = text.replace(';', ' ; ')
-	
-	text = text.replace('-', ' ')
-	text = text.replace('+', ' ')
-	text = text.replace('#', ' ')    
-	text = text.replace('"', ' ')
-	
-	return text
 
 def get_model_friendly_scores(scores_array, prompt_id_array):
 	arg_type = type(prompt_id_array)
@@ -322,15 +163,16 @@ def get_tfidf(file_path, prompt_id=-1, tfidf_dim=3000, pca_dim=50, tfidf=None, p
 			tfidf_matrix =  tfidf.fit_transform(data_x)
 		else:
 			tfidf_matrix =  tfidf.transform(data_x)
+		logger.info('<TF/IDF> TF/IDF matrix: ' + str(tfidf_matrix.shape))
 		if training_material:
-			from sklearn.decomposition import PCA
-			pca = PCA(n_components=pca_dim)
-			pca.fit(tfidf_matrix.todense())
-			pca_matrix = pca.fit_transform(tfidf_matrix.todense())
+			from sklearn.decomposition import TruncatedSVD
+			pca = TruncatedSVD(n_components=pca_dim)
+			pca.fit(tfidf_matrix)
+			pca_matrix = pca.fit_transform(tfidf_matrix)
 		else:
-			pca_matrix = pca.transform(tfidf_matrix.todense())
+			pca_matrix = pca.transform(tfidf_matrix)
 # 		feature_names = tfidf.get_feature_names()
-	logger.info('<TF/IDF> PCA matrix: ' + str(pca_matrix.shape))
+		logger.info('<TF/IDF> PCA matrix: ' + str(pca_matrix.shape))
 	return pca_matrix, tfidf, pca
 
 def read_dataset(file_path, prompt_id, maxlen, vocab, tokenize_text, to_lower, score_index=6):
@@ -409,3 +251,28 @@ def get_data(paths, prompt_id, vocab_size, maxlen, tokenize_text=False, to_lower
 		return ((train_x,train_y,train_prompts), (dev_x,dev_y,dev_prompts), (test_x,test_y,test_prompts), vocab, overal_maxlen)
 	else:
 		return ((train_x,train_y,train_prompts), (test_x,test_y,test_prompts), vocab, overal_maxlen)
+	
+def get_features(file_path, prompt_id=-1, norm=False):
+	logger.info('<Features> Reading dataset from: ' + file_path)
+	with codecs.open(file_path, mode='r', encoding='UTF8') as input_file:
+		next(input_file)
+		data = []
+		for line in tqdm(input_file):
+			# get obj for an essay
+			send_obj = features(line.split('\n')[0].split('\t'))
+			# get numberical features
+			send_obj.set_word_count(5)
+			# get PoS count: noun,verb,adj,adv
+			send_obj.set_pos_features()
+			# punctuation count: quote, dot, comma
+			send_obj.set_punctuation_features()
+			# countable features to vector
+			send_obj.set_vectors()
+			# top 1/3 text rank phrases
+# 			send_obj.get_phrases()
+			data.append(send_obj.vector[:-1])
+		feature_matrix = np.array(data)
+		if norm:
+			from sklearn.preprocessing import normalize
+			feature_matrix = normalize(feature_matrix, axis=1, norm='l1')
+	return feature_matrix

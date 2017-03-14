@@ -135,70 +135,44 @@ def create_model(args, initial_mean_value, overal_maxlen, vocab):
 	# Augmented TF/IDF Layer
 	if args.tfidf > 0:
 		pca_input = Input(shape=(args.tfidf,), dtype='float32')
-		tfidfmerged = merge([x,pca_input], mode='concat')
+		merged = merge([x,pca_input], mode='concat')
 	else:
-		tfidfmerged = x
-		
+		merged = x
+	
+	# Augmented Numerical Features
+	if args.features:
+		ftr_input = Input(shape=(13,), dtype='float32')
+		merged = merge([merged,ftr_input], mode='concat')
+				
 	# Optional Dense Layer	
 	if args.dense > 0:
 		if args.loss == 'hng':
-			tfidfmerged = Dense(num_outputs, init=dense_init, W_regularizer=l2(0.001), activity_regularizer=activity_l2(0.001) )(tfidfmerged)
+			merged = Dense(num_outputs, init=dense_init, W_regularizer=l2(0.001), activity_regularizer=activity_l2(0.001) )(merged)
 		else:
-			tfidfmerged = Dense(num_outputs, init=dense_init)(tfidfmerged)
+			merged = Dense(num_outputs, init=dense_init)(merged)
 		if final_activation == 'relu' or final_activation == 'linear':
-			tfidfmerged = BatchNormalization()(tfidfmerged)
-		tfidfmerged = Activation(dense_activation)(tfidfmerged)
+			merged = BatchNormalization()(merged)
+		merged = Activation(dense_activation)(merged)
 		if args.dropout_prob > 0:
-			tfidfmerged = Dropout(args.dropout_prob)(tfidfmerged)
+			merged = Dropout(args.dropout_prob)(merged)
 		
 	# Final Prediction Layer
 	if args.loss == 'hng':
-		tfidfmerged = Dense(num_outputs, init=final_init, W_regularizer=l2(0.001), activity_regularizer=activity_l2(0.001) )(tfidfmerged)
+		merged = Dense(num_outputs, init=final_init, W_regularizer=l2(0.001), activity_regularizer=activity_l2(0.001) )(merged)
 	else:
-		tfidfmerged = Dense(num_outputs, init=final_init)(tfidfmerged)
+		merged = Dense(num_outputs, init=final_init)(merged)
 	if final_activation == 'relu' or final_activation == 'linear':
-		tfidfmerged = BatchNormalization()(tfidfmerged)
-	predictions = Activation(final_activation)(tfidfmerged)
-		
-# 	else: # if no rnn
-# 		if args.dropout_prob > 0:
-# 			x = Dropout(args.dropout_prob)(x)
-# 		# Mean over Time
-# 		if args.aggregation == 'mot':
-# 			x = MeanOverTime(mask_zero=True)(x)
-# 		else:
-# 			raise NotImplementedError
-# 		# Augmented TF/IDF Layer
-# 		if args.tfidf > 0:
-# 			pca_input = Input(shape=(args.tfidf,), dtype='float32')
-# 			z = merge([x,pca_input], mode='concat')
-# 		else:
-# 			z = x
-# 		# Optional Dense Layer
-# 		if args.dense > 0:
-# 			if args.loss == 'hng':
-# 				z = Dense(args.dense, init=dense_init, W_regularizer=l2(0.001), activity_regularizer=activity_l2(0.001) )(z)
-# 			else:
-# 				z = Dense(args.dense, init=dense_init)(z)
-# 			if final_activation == 'relu' or final_activation == 'linear':
-# 				z = BatchNormalization()(z)	
-# 			z = Activation(dense_activation)(z)
-# 			if args.dropout_prob > 0:
-# 				z = Dropout(args.dropout_prob)(z)
-# 		# Final Prediction Layer
-# 		if args.loss == 'hng':
-# 			z = Dense(num_outputs, init=final_init, W_regularizer=l2(0.001), activity_regularizer=activity_l2(0.001) )(z)
-# 		else:
-# 			z = Dense(args.dense, init=dense_init)(z)
-# 		if final_activation == 'relu' or final_activation == 'linear':
-# 			z = BatchNormalization()(z)
-# 		predictions = Activation(final_activation)(z)
-		
-	# Model Input/Output	
+		merged = BatchNormalization()(merged)
+	predictions = Activation(final_activation)(merged)
+	
+	# Model Input/Output
+	model_input = [sequence,]	
 	if args.tfidf > 0:
-		model = Model(input=[sequence, pca_input], output=predictions)
-	else:
-		model = Model(input=sequence, output=predictions)
+		model_input.append(pca_input)
+	if args.features:
+		model_input.append(ftr_input)
+
+	model = Model(input=model_input, output=predictions)
 
 	logger.info('  Model Done')
 	return model

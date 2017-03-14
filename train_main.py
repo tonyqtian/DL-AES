@@ -3,17 +3,15 @@ Created on Feb 26, 2017
 
 @author: tonyq
 '''
+import matplotlib
+matplotlib.use('Agg')
+
 import logging
 import numpy as np
-# from time import time
 import nea.utils as U
 import pickle as pk
 from keras.utils.np_utils import to_categorical
-
-import matplotlib
 from keras.callbacks import EarlyStopping
-from keras.metrics import hinge
-matplotlib.use('Agg')
 
 logger = logging.getLogger(__name__)
 
@@ -60,6 +58,14 @@ def train(args):
 	else:
 		dev_pca = None
 		test_pca = None
+		
+	if args.features:
+		train_ftr = dataset.get_features(args.train_path, args.prompt_id, norm=args.normalize)
+		if args.valid_split == 0:
+			valid_ftr = dataset.get_features(args.dev_path, args.prompt_id, norm=args.normalize)
+		test_ftr = dataset.get_features(args.test_path, args.prompt_id, norm=args.normalize)
+	else:
+		test_ftr = None
 	
 	if not args.vocab_path:
 		# Dump vocab
@@ -209,8 +215,7 @@ def train(args):
 	## Initialize Evaluator
 	#
 	
-# 	evl = Evaluator(args, out_dir, dev_x, test_x, dev_y, test_y, dev_y_org, test_y_org, dev_pmt, test_pmt, dev_pca=dev_pca, test_pca=test_pca)
-	evl = Evaluator(args, out_dir, timestr, metric, test_x, test_y, test_y_org, test_pmt, test_pca=test_pca)
+	evl = Evaluator(args, out_dir, timestr, metric, test_x, test_y, test_y_org, test_pmt, test_pca=test_pca, test_ftr=test_ftr)
 	earlystop = EarlyStopping(monitor=metric, patience = args.earlystop, verbose=1, mode='auto' )
 	
 	###############################################################################################################################
@@ -221,94 +226,21 @@ def train(args):
 	logger.info('Initial Evaluation:')
 	evl.eval(model, -1, print_info=True)
 	
-# 	total_train_time = 0
-# 	total_eval_time = 0
-	
-# 	if args.plot:
-# 		training_epochs = []
-# 		training_losses = []
-# 		training_accuracy = []
-# 		dev_losses = []
-# 		dev_accuracy = []
-# 		dev_qwks = []
-# 		test_qwks = []
-
+	model_train_x = [train_x,]
+	if not args.valid_split:
+		model_dev_x = [dev_x,]
+	if args.tfidf > 0:
+		model_train_x.append(train_pca)
+		if not args.valid_split:
+			model_dev_x.append(dev_pca)
+	if args.features:
+		model_train_x.append(train_ftr)
+		if not args.valid_split:
+			model_dev_x.append(valid_ftr)
+		
 	if args.valid_split > 0:
-		if args.tfidf > 0:
-			model.fit([train_x, train_pca], train_y, validation_split=args.valid_split, batch_size=args.batch_size, nb_epoch=args.epochs, verbose=args.verbose, callbacks=[earlystop, evl])
-		else:
-			model.fit(train_x, train_y, validation_split=args.valid_split, batch_size=args.batch_size, nb_epoch=args.epochs, verbose=args.verbose, callbacks=[earlystop, evl])
+		model.fit(model_train_x, train_y, validation_split=args.valid_split, batch_size=args.batch_size, nb_epoch=args.epochs, verbose=args.verbose, callbacks=[earlystop, evl])
 	else:	
-		if args.tfidf > 0:
-			model.fit([train_x, train_pca], train_y, validation_data=([dev_x, dev_pca], dev_y), batch_size=args.batch_size, nb_epoch=args.epochs, verbose=args.verbose, callbacks=[earlystop, evl])
-		else:
-			model.fit(train_x, train_y, validation_data=(dev_x, dev_y), batch_size=args.batch_size, nb_epoch=args.epochs, verbose=args.verbose, callbacks=[earlystop, evl])
+		model.fit(model_train_x, train_y, validation_data=(model_dev_x, dev_y), batch_size=args.batch_size, nb_epoch=args.epochs, verbose=args.verbose, callbacks=[earlystop, evl])
 	
-# 	for ii in range(args.epochs):
-# 		# Training
-# 		t0 = time()
-# 		if args.tfidf > 0:
-# 			train_history = model.fit([train_x, train_pca], train_y, batch_size=args.batch_size, nb_epoch=1, verbose=args.verbose)
-# 		else:
-# 			train_history = model.fit(train_x, train_y, batch_size=args.batch_size, nb_epoch=1, verbose=args.verbose)
-# 		tr_time = time() - t0
-# 		total_train_time += tr_time
-# 		
-# 		# Evaluate
-# 		t0 = time()
-# 		dev_loss, dev_acc, dev_qwk, test_qwk = evl.eval(model, ii)
-# 		evl_time = time() - t0
-# 		total_eval_time += evl_time
-# 		
-# 		# Print information
-# 		train_loss = train_history.history['loss'][0]
-# 		train_metric = train_history.history[metric][0]
-# 		logger.info('Epoch %d, train: %is, evaluation: %is' % (ii, tr_time, evl_time))
-# 		logger.info('[Train] loss: %.4f, metric: %.4f' % (train_loss, train_metric))
-# 		evl.print_info()
-# 		
-# 		if args.plot:
-# 			training_epochs.append(ii)
-# 			training_losses.append(train_loss)
-# 			training_accuracy.append(train_metric)
-# 			dev_losses.append(dev_loss)
-# 			dev_accuracy.append(dev_acc)
-# 			dev_qwks.append(dev_qwk)
-# 			test_qwks.append(test_qwk)
-# 		
-# 		if args.earlystop > 0:
-# 			if dev_loss / train_loss > args.earlystop:
-# 				logger.info('Early stop >>> dev/train loss rate: %0.2f ' % (dev_loss/train_loss,))
-# 				break
-			
-	###############################################################################################################################
-	## Summary of the results
-	#
-	
-# 	logger.info('Training:   %i seconds in total' % total_train_time)
-# 	logger.info('Evaluation: %i seconds in total' % total_eval_time)
-	
-# 	if args.plot:
-# 		import matplotlib.pyplot as plt
-# 		
-# 		plt.plot(training_epochs, training_losses, 'b', label='Train Loss')
-# 		plt.plot(training_epochs, training_accuracy, 'r.', label='Train Accuracy')
-# 		plt.plot(training_epochs, dev_losses, 'g', label='Dev Loss')
-# 		plt.plot(training_epochs, dev_accuracy, 'y.', label='Dev Accuracy')
-# 		plt.legend()
-# 		plt.xlabel('epochs')
-# 		plt.savefig(out_dir + '/' + timestr + 'LossAccuracy.png')
-# 		# plt.show()
-# 		plt.close()
-# 		
-# 		plt.plot(training_epochs, training_accuracy, 'b', label='Train Accuracy')
-# 		plt.plot(training_epochs, dev_accuracy, 'g', label='Dev Accuracy')
-# 		plt.plot(training_epochs, dev_qwks, 'r.', label='Dev QWK')
-# 		plt.plot(training_epochs, test_qwks, 'y.', label='Test QWK')
-# 		plt.xlabel('epochs')
-# 		plt.legend()
-# 		plt.savefig(out_dir + '/' + timestr + 'QWK.png')
-# 		# plt.show()
-# 		plt.close()
-
 	return evl.print_final_info()
