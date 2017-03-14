@@ -115,12 +115,18 @@ def create_model(args, initial_mean_value, overal_maxlen, vocab):
 			
 		# Stack 2 Layers
 		if args.rnn_2l or args.rnn_3l:
-			x = rnn_layer(x)
+			rnn_layer2 = RNN(args.rnn_dim, return_sequences=True, consume_less=args.rnn_opt, dropout_W=dropout_W, dropout_U=dropout_U)
+			if args.bi:
+				rnn_layer2 = Bidirectional(rnn_layer2)
+			x = rnn_layer2(x)
 			if args.dropout_prob > 0:
 				x = Dropout(args.dropout_prob)(x)
 			# Stack 3 Layers
 			if args.rnn_3l:
-				x = rnn_layer(x)
+				rnn_layer3 = RNN(args.rnn_dim, return_sequences=True, consume_less=args.rnn_opt, dropout_W=dropout_W, dropout_U=dropout_U)
+				if args.bi:
+					rnn_layer3 = Bidirectional(rnn_layer3)
+				x = rnn_layer3(x)
 				if args.dropout_prob > 0:
 					x = Dropout(args.dropout_prob)(x)
 			
