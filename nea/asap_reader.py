@@ -252,8 +252,18 @@ def get_data(paths, prompt_id, vocab_size, maxlen, tokenize_text=False, to_lower
 	else:
 		return ((train_x,train_y,train_prompts), (test_x,test_y,test_prompts), vocab, overal_maxlen)
 	
-def get_features(file_path, prompt_id=-1, norm=False):
+def get_features(file_path, feature_path, prompt_id=-1, norm=False):
 	logger.info('<Features> Reading dataset from: ' + file_path)
+	if feature_path:
+		with codecs.open(feature_path, mode='r', encoding='UTF8') as input_file:
+			data = []
+			for line in input_file:
+				data.append([float(strs) for strs in line.strip().split(' ')])
+			feature_matrix = np.array(data)
+		if norm:
+			from sklearn.preprocessing import normalize
+			feature_matrix = normalize(feature_matrix, axis=1, norm='l1')
+		return feature_matrix
 	with codecs.open(file_path, mode='r', encoding='UTF8') as input_file:
 		next(input_file)
 		inputs = input_file.readlines()

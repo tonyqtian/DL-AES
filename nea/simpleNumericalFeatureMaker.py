@@ -6,7 +6,7 @@ Created on Mar 14, 2017
 import sys
 import codecs
 from tqdm import tqdm
-from nea.fileparse import features
+from fileparse import features
 import argparse
 
 parser = argparse.ArgumentParser()

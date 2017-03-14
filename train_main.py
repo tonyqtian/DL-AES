@@ -60,10 +60,10 @@ def train(args):
 		test_pca = None
 		
 	if args.features:
-		train_ftr = dataset.get_features(args.train_path, args.prompt_id, norm=args.normalize)
+		train_ftr = dataset.get_features(args.train_path, args.train_feature_path, args.prompt_id, norm=args.normalize)
 		if args.valid_split == 0:
-			valid_ftr = dataset.get_features(args.dev_path, args.prompt_id, norm=args.normalize)
-		test_ftr = dataset.get_features(args.test_path, args.prompt_id, norm=args.normalize)
+			valid_ftr = dataset.get_features(args.dev_path, args.dev_feature_path, args.prompt_id, norm=args.normalize)
+		test_ftr = dataset.get_features(args.test_path, args.test_feature_path, args.prompt_id, norm=args.normalize)
 	else:
 		test_ftr = None
 	

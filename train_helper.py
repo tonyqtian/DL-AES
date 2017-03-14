@@ -52,6 +52,9 @@ parser.add_argument("--verbose", dest="verbose", type=int, metavar='<int>', defa
 parser.add_argument("--valid-split", dest="valid_split", type=float, metavar='<float>', default=0.0, help="Split validation set from training set (default=0.0)")
 parser.add_argument("--rnn-optimization", dest="rnn_opt", type=str, metavar='<str>', default='gpu', help="RNN consume_less (cpu|mem|gpu) (default=gpu)")
 parser.add_argument("--features", dest="features", action='store_true', help="Get numerical features from essays")
+parser.add_argument("--tr-ftr", dest="train_feature_path", type=str, metavar='<str>', default=None, help="The path to the training feature file")
+parser.add_argument("--dev-ftr", dest="dev_feature_path", type=str, metavar='<str>', default=None, help="The path to the valid feature file")
+parser.add_argument("--test-ftr", dest="test_feature_path", type=str, metavar='<str>', default=None, help="The path to the test feature file")
 args = parser.parse_args()
 
 from train_main import train
