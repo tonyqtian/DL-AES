@@ -1,6 +1,6 @@
 # import random
 import codecs
-# import sys
+import sys
 from nltk.tokenize import word_tokenize
 import logging
 import re
@@ -256,8 +256,9 @@ def get_features(file_path, prompt_id=-1, norm=False):
 	logger.info('<Features> Reading dataset from: ' + file_path)
 	with codecs.open(file_path, mode='r', encoding='UTF8') as input_file:
 		next(input_file)
+		inputs = input_file.readlines()
 		data = []
-		for line in tqdm(input_file):
+		for line in tqdm(inputs, file=sys.stdout):
 			# get obj for an essay
 			send_obj = features(line.split('\n')[0].split('\t'))
 			# get numberical features
