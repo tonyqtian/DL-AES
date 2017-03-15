@@ -73,7 +73,7 @@ class Evaluator(Callback):
 				model.save_weights(self.out_dir + '/best_model_weights.h5', overwrite=True)
 	
 		if print_info:
-			self.print_info(test_qwk)
+			self.print_info(epoch, test_qwk)
 		return test_qwk
 
 	def on_epoch_end(self, epoch, logs={}):
@@ -105,8 +105,9 @@ class Evaluator(Callback):
 		plt.savefig(self.out_dir + '/' + self.timestr + 'QWK.png')
 		plt.close()	
 			
-	def print_info(self, test_qwk):
+	def print_info(self, epoch, test_qwk):
 		logger.info('\n')
+		logger.info('[Test]  Epoch: %i' % epoch)
 		logger.info('[Test]  loss: %.4f, metric: %.4f, mean: %.3f (%.3f), stdev: %.3f (%.3f)' % (
 			self.test_loss, self.test_metric, self.test_pred.mean(), self.test_mean, self.test_pred.std(), self.test_std))
 		logger.info('[TEST]  QWK:  %.3f (Best @ %i: %.3f)' % (test_qwk, self.best_epoch, self.best_test))				
