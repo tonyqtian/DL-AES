@@ -7,7 +7,7 @@ from keras.models import Model
 from keras.layers.core import Activation, Dense, Dropout
 from nea.my_layers import MeanOverTime, Conv1DWithMasking
 from keras.layers.normalization import BatchNormalization
-from keras.regularizers import l2, activity_l2
+from keras.regularizers import l2
 from keras.engine.topology import Input, merge
 from keras.layers.wrappers import Bidirectional
 
@@ -149,11 +149,11 @@ def create_model(args, initial_mean_value, overal_maxlen, vocab):
 	if args.features:
 		ftr_input = Input(shape=(13,), dtype='float32')
 		merged = merge([merged,ftr_input], mode='concat')
-				
+	
 	# Optional Dense Layer	
 	if args.dense > 0:
 		if args.loss == 'hng':
-			merged = Dense(num_outputs, init=dense_init, W_regularizer=l2(0.001), activity_regularizer=activity_l2(0.001) )(merged)
+			merged = Dense(num_outputs, init=dense_init, W_regularizer=l2(0.001), activity_regularizer=l2(0.001) )(merged)
 		else:
 			merged = Dense(num_outputs, init=dense_init)(merged)
 		if final_activation == 'relu' or final_activation == 'linear':
@@ -164,7 +164,7 @@ def create_model(args, initial_mean_value, overal_maxlen, vocab):
 		
 	# Final Prediction Layer
 	if args.loss == 'hng':
-		merged = Dense(num_outputs, init=final_init, W_regularizer=l2(0.001), activity_regularizer=activity_l2(0.001) )(merged)
+		merged = Dense(num_outputs, init=final_init, W_regularizer=l2(0.001), activity_regularizer=l2(0.001) )(merged)
 	else:
 		merged = Dense(num_outputs, init=final_init)(merged)
 	if final_activation == 'relu' or final_activation == 'linear':

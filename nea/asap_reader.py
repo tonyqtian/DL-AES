@@ -253,8 +253,8 @@ def get_data(paths, prompt_id, vocab_size, maxlen, tokenize_text=False, to_lower
 		return ((train_x,train_y,train_prompts), (test_x,test_y,test_prompts), vocab, overal_maxlen)
 	
 def get_features(file_path, feature_path, prompt_id=-1, norm=False):
-	logger.info('<Features> Reading dataset from: ' + file_path)
 	if feature_path:
+		logger.info('<Features> Loading dataset from: ' + feature_path)
 		with codecs.open(feature_path, mode='r', encoding='UTF8') as input_file:
 			data = []
 			for line in input_file:
@@ -264,6 +264,7 @@ def get_features(file_path, feature_path, prompt_id=-1, norm=False):
 			from sklearn.preprocessing import normalize
 			feature_matrix = normalize(feature_matrix, axis=1, norm='l1')
 		return feature_matrix
+	logger.info('<Features> processing dataset from: ' + file_path)
 	with codecs.open(file_path, mode='r', encoding='UTF8') as input_file:
 		next(input_file)
 		inputs = input_file.readlines()
