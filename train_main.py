@@ -216,7 +216,7 @@ def train(args):
 	#
 	
 	evl = Evaluator(args, out_dir, timestr, metric, test_x, test_y, test_y_org, test_pmt, test_pca=test_pca, test_ftr=test_ftr)
-	earlystop = EarlyStopping(monitor=loss, patience = args.earlystop, verbose=1, mode='auto' )
+	earlystop = EarlyStopping(monitor=metric, patience = args.earlystop, verbose=1, mode='auto' )
 	
 	###############################################################################################################################
 	## Training
