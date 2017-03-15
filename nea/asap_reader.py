@@ -252,7 +252,7 @@ def get_data(paths, prompt_id, vocab_size, maxlen, tokenize_text=False, to_lower
 	else:
 		return ((train_x,train_y,train_prompts), (test_x,test_y,test_prompts), vocab, overal_maxlen)
 	
-def get_features(file_path, feature_path, prompt_id=-1, norm=False):
+def get_features(file_path, feature_path, prompt_id=-1, norm=True):
 	if feature_path:
 		logger.info('<Features> Loading dataset from: ' + feature_path)
 		with codecs.open(feature_path, mode='r', encoding='UTF8') as input_file:
