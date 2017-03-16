@@ -56,7 +56,7 @@ parser.add_argument("--tr-ftr", dest="train_feature_path", type=str, metavar='<s
 parser.add_argument("--dev-ftr", dest="dev_feature_path", type=str, metavar='<str>', default=None, help="The path to the valid feature file")
 parser.add_argument("--test-ftr", dest="test_feature_path", type=str, metavar='<str>', default=None, help="The path to the test feature file")
 parser.add_argument("--pre-train-path", dest="pre_train_path", type=str, metavar='<str>', default=None, help="The path to pre-training file")
-parser.add_argument("--pre-epoch", dest="pre_epoch", type=int, metavar='<int>', default=0, help="Pre training epoch")
+parser.add_argument("--pre-epochs", dest="pre_epochs", type=int, metavar='<int>', default=0, help="Pre training epoch")
 args = parser.parse_args()
 
 from train_main import train
