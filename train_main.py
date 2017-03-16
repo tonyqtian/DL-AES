@@ -49,7 +49,15 @@ def train(args):
 		(train_x, train_y, train_pmt), (dev_x, dev_y, dev_pmt), (test_x, test_y, test_pmt), vocab, overal_maxlen = dataset.get_data(
 			(args.train_path, args.dev_path, args.test_path), args.prompt_id, args.vocab_size, args.maxlen, 
 			tokenize_text=True, to_lower=True, sort_by_len=False, vocab_path=args.vocab_path)
-	
+
+	if args.pre_train_path:
+		if args.valid_split == 0:
+			args.valid_split = 0.2
+		(pre_train_x, pre_train_y, pre_train_pmt), _, _, pre_overal_maxlen = dataset.get_data(
+			(args.pre_train_path, args.test_path), args.prompt_id, args.vocab_size, args.maxlen, 
+			tokenize_text=True, to_lower=True, sort_by_len=False, vocab_path=args.vocab_path)
+		overal_maxlen = max(overal_maxlen, pre_overal_maxlen)
+		
 	if args.tfidf > 0:
 		train_pca, TfIdf, Pca = dataset.get_tfidf(args.train_path, args.prompt_id, pca_dim=args.tfidf, training_material=True)
 		if args.valid_split == 0:
@@ -79,6 +87,8 @@ def train(args):
 	train_x = sequence.pad_sequences(train_x, maxlen=overal_maxlen)
 	if args.valid_split == 0:
 		dev_x = sequence.pad_sequences(dev_x, maxlen=overal_maxlen)
+	if args.pre_train_path:
+		pre_train_x = sequence.pad_sequences(pre_train_x, maxlen=overal_maxlen)
 	test_x = sequence.pad_sequences(test_x, maxlen=overal_maxlen)
 # 	else:
 # 		train_x = sequence.pad_sequences(train_x)
@@ -94,6 +104,8 @@ def train(args):
 	train_y = np.array(train_y, dtype=K.floatx())
 	if args.valid_split == 0:
 		dev_y = np.array(dev_y, dtype=K.floatx())
+	if args.pre_train_path:
+		pre_train_y = np.array(pre_train_y, dtype=K.floatx())
 	test_y = np.array(test_y, dtype=K.floatx())
 	
 	if args.prompt_id >= 0:
@@ -149,10 +161,14 @@ def train(args):
 		logger.info('  covert train_y to one hot shape')
 		assert len(bincounts) == 1, "support only one y value"
 		categ = int(max(bincounts[0].keys())) + 1
+		if args.pre_train_path:
+			categ = 5
 		# covert to np array to minus 1 to get zero based value
 		train_y = to_categorical(train_y, categ)
 		if args.valid_split == 0:
 			dev_y = to_categorical(dev_y, categ)
+		if args.pre_train_path:
+			pre_train_y = to_categorical(pre_train_y, categ)
 		test_y = to_categorical(test_y, categ)
 			
 	###############################################################################################################################
@@ -237,10 +253,13 @@ def train(args):
 		model_train_x.append(train_ftr)
 		if not args.valid_split:
 			model_dev_x.append(valid_ftr)
+	
+	if args.pre_train_path:
+		model.fit(pre_train_x, pre_train_y, validation_split=args.valid_split, batch_size=args.batch_size, nb_epoch=args.epochs, verbose=args.verbose, callbacks=[earlystop])
 		
 	if args.valid_split > 0:
 		model.fit(model_train_x, train_y, validation_split=args.valid_split, batch_size=args.batch_size, nb_epoch=args.epochs, verbose=args.verbose, callbacks=[earlystop, evl])
-	else:	
+	else:
 		model.fit(model_train_x, train_y, validation_data=(model_dev_x, dev_y), batch_size=args.batch_size, nb_epoch=args.epochs, verbose=args.verbose, callbacks=[earlystop, evl])
 	
 	return evl.print_final_info()

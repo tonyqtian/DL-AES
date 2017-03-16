@@ -55,6 +55,7 @@ parser.add_argument("--features", dest="features", action='store_true', help="Ge
 parser.add_argument("--tr-ftr", dest="train_feature_path", type=str, metavar='<str>', default=None, help="The path to the training feature file")
 parser.add_argument("--dev-ftr", dest="dev_feature_path", type=str, metavar='<str>', default=None, help="The path to the valid feature file")
 parser.add_argument("--test-ftr", dest="test_feature_path", type=str, metavar='<str>', default=None, help="The path to the test feature file")
+parser.add_argument("--pre-train-path", dest="pre_train_path", type=str, metavar='<str>', default=None, help="The path to pre-training file")
 args = parser.parse_args()
 
 from train_main import train
