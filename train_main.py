@@ -255,7 +255,7 @@ def train(args):
 			model_dev_x.append(valid_ftr)
 	
 	if args.pre_train_path:
-		model.fit(pre_train_x, pre_train_y, validation_split=args.valid_split, batch_size=args.batch_size, nb_epoch=args.epochs, verbose=args.verbose, callbacks=[earlystop])
+		model.fit(pre_train_x, pre_train_y, validation_split=args.valid_split, batch_size=args.batch_size, nb_epoch=args.pre_epochs, verbose=args.verbose, callbacks=[earlystop, evl])
 		
 	if args.valid_split > 0:
 		model.fit(model_train_x, train_y, validation_split=args.valid_split, batch_size=args.batch_size, nb_epoch=args.epochs, verbose=args.verbose, callbacks=[earlystop, evl])
