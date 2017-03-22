@@ -26,7 +26,7 @@ def train(args):
 	assert args.algorithm in {'rmsprop', 'sgd', 'adagrad', 'adadelta', 'adam', 'adamax'}
 	assert args.loss in {'mse', 'mae', 'cnp', 'hng'}
 	assert args.recurrent_unit in {'lstm', 'gru', 'simple'}
-	assert args.aggregation in {'mot', 'sot'}
+	assert args.aggregation in {'mot', 'att'}
 	
 	if args.seed > 0:
 		np.random.seed(args.seed)

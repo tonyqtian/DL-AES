@@ -5,11 +5,12 @@ import keras.backend as K
 from keras.layers.embeddings import Embedding
 from keras.models import Model
 from keras.layers.core import Activation, Dense, Dropout
-from nea.my_layers import MeanOverTime, Conv1DWithMasking
+from nea.my_layers import MeanOverTime, Conv1DWithMasking, DenseWithMasking
 from keras.layers.normalization import BatchNormalization
 from keras.regularizers import l2
 from keras.engine.topology import Input, merge
 from keras.layers.wrappers import Bidirectional
+from nea.attention_wrapper import Attention
 
 logger = logging.getLogger(__name__)
 
@@ -133,8 +134,10 @@ def create_model(args, initial_mean_value, overal_maxlen, vocab):
 	# Mean over Time
 	if args.aggregation == 'mot':
 		x = MeanOverTime(mask_zero=True)(x)
-	elif args.aggregation == 'sot':
-		x = MeanOverTime(mask_zero=True)(x)
+	elif args.aggregation == 'att':
+		attention_rnn = RNN(args.rnn_dim, return_sequences=False, consume_less=args.rnn_opt, dropout_W=dropout_W, dropout_U=dropout_U)
+		attention_rnn = Attention(attention_rnn)
+		x = attention_rnn(x)
 	else:
 		raise NotImplementedError
 				
@@ -153,9 +156,9 @@ def create_model(args, initial_mean_value, overal_maxlen, vocab):
 	# Optional Dense Layer	
 	if args.dense > 0:
 		if args.loss == 'hng':
-			merged = Dense(num_outputs, init=dense_init, W_regularizer=l2(0.001), activity_regularizer=l2(0.001) )(merged)
+			merged = DenseWithMasking(num_outputs, init=dense_init, W_regularizer=l2(0.001), activity_regularizer=l2(0.001) )(merged)
 		else:
-			merged = Dense(num_outputs, init=dense_init)(merged)
+			merged = DenseWithMasking(num_outputs, init=dense_init)(merged)
 		if final_activation == 'relu' or final_activation == 'linear':
 			merged = BatchNormalization()(merged)
 		merged = Activation(dense_activation)(merged)
@@ -164,9 +167,9 @@ def create_model(args, initial_mean_value, overal_maxlen, vocab):
 		
 	# Final Prediction Layer
 	if args.loss == 'hng':
-		merged = Dense(num_outputs, init=final_init, W_regularizer=l2(0.001), activity_regularizer=l2(0.001) )(merged)
+		merged = DenseWithMasking(num_outputs, init=final_init, W_regularizer=l2(0.001), activity_regularizer=l2(0.001) )(merged)
 	else:
-		merged = Dense(num_outputs, init=final_init)(merged)
+		merged = DenseWithMasking(num_outputs, init=final_init)(merged)
 	if final_activation == 'relu' or final_activation == 'linear':
 		merged = BatchNormalization()(merged)
 	predictions = Activation(final_activation)(merged)

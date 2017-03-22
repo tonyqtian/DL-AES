@@ -1,7 +1,8 @@
 import keras.backend as K
 from keras.engine.topology import Layer
 from keras.layers.convolutional import Convolution1D
-import numpy as np
+from keras.layers.core import Dense
+# import numpy as np
 # import sys
 
 # class Attention(Layer):
@@ -99,3 +100,11 @@ class Conv1DWithMasking(Convolution1D):
 	
 	def compute_mask(self, x, mask):
 		return mask
+
+class DenseWithMasking(Dense):
+	def __init__(self, output_dim, **kwargs):
+		self.supports_masking = True
+		super(DenseWithMasking, self).__init__(output_dim, **kwargs)
+	
+	def compute_mask(self, x, mask=None):
+		return None
